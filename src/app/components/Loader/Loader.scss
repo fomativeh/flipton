@@ -1,0 +1,13 @@
+@keyframes scale-up-down {
+    0%, 100% {
+      transform: scale(.8);
+    }
+    50% {
+      transform: scale(1.06); /* Adjust scale factor as desired */
+    }
+  }
+  
+  .loader {
+    animation: scale-up-down 1s ease-in-out infinite;
+  }
+  
