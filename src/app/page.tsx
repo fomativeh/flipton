@@ -17,17 +17,29 @@ import { fetchUserAccount } from "@/api/user";
 import { setName } from "@/helpers/setName";
 import { gameType } from "@/types/gameType";
 import { botSocketHandler } from "@/helpers/botSocketHandler";
+import Image from "next/image";
 
 const Home = () => {
   let chatId = 6450051353;
-  let token = ""
-  const [userData, setUserData] = useState<User>(null);
+  let token = "";
   const [games, setGames] = useState<gameType[]>([]);
   const [showGamesList, setShowGamesList] = useState<boolean>(true);
   const [isCreatingGame, setIsCreatingGame] = useState<boolean>(false);
   const [showCreatedModal, setShowCreatedModal] = useState<boolean>(false);
   const [showGameplayModal, setShowGameplayModal] = useState<boolean>(false);
   const [showGameResult, setShowGameResult] = useState<boolean>(false);
+  const [userData, setUserData] = useState<User>(null);
+  const [showCreatedMessage, setShowCreatedMessage] = useState<boolean>(false);
+  const [player2HasJoined,setPlayer2HasJoined] = useState<boolean>(false)
+
+  useEffect(() => {
+    if (userData?.waitingForPlayer2) {
+      setShowCreatedModal(true);
+      setTimeout(() => {
+        setShowCreatedMessage(true);
+      }, 2000);
+    }
+  }, [userData?.waitingForPlayer2]);
 
   useEffect(() => {
     if (isCreatingGame) {
@@ -99,13 +111,101 @@ const Home = () => {
     };
   }, []);
 
+  const walletAddress = useTonAddress();
+  const { state, open, close } = useTonConnectModal();
+
+  const [tonConnectUI] = useTonConnectUI();
+  // console.log(tonConnectUI.connected);
+
+  const [walletLoaded, setWalletLoaded] = useState<boolean>(false);
+
+  const initWallet = () => {
+    // Correctly typing the interval ID for both Node.js and browser
+    const intervalId: ReturnType<typeof setInterval> = setInterval(() => {
+      let loader = document.querySelector(".go121314943");
+      // console.log(loader);
+      if (!loader) {
+        setWalletLoaded(true);
+        clearInterval(intervalId); // Clear the interval to stop it
+      }
+    }, 1000);
+  };
+
+  useEffect(() => {
+    initWallet();
+  }, []);
+
+  const handleWalletClick = () => {
+    if (!tonConnectUI.connected) {
+      open();
+    } else {
+      tonConnectUI.disconnect();
+    }
+  };
+
+  const [walletErr, setWalletErr] = useState<string>("");
+
+  const createGameWithPencil = () => {
+    // if (!tonConnectUI.connected) {
+    //   setWalletErr("Please connect your wallet to join/start a game.");
+    //   return setTimeout(() => setWalletErr(""), 2800);
+    // }
+
+    setIsCreatingGame(true);
+  };
+
   const [currentPage, setCurrentPage] = useState<string>("Game Lobby");
   return (
-    <main className="w-full min-h-screen flex flex-col justify-start items-center">
-      <Navbar currentPage={currentPage} setCurrentPage={setCurrentPage} />
+    <main className="w-full h-[100vh] flex flex-col justify-start items-center">
+      <TonConnectButton className="hidden" />
+      <Navbar
+        photo={userData?.photo as string}
+        currentPage={currentPage}
+        setCurrentPage={setCurrentPage}
+      />
+      {/* New game card */}
+
+      {/* {walletLoaded && ( //Uncomment this before push
+        <>
+          {tonConnectUI.connected && !isCreatingGame (
+            <section
+              onClick={createGameWithPencil}
+              className="z-[99] fixed bottom-[100px] right-[22px] w-[60px] h-[60px] bg-[#2B2930] rounded-[17px] flex justify-center items-center"
+            >
+              <figure className="relative w-[20px] h-[20px]">
+                <Image
+                  src={"/assets/icons/new-game.svg"}
+                  alt={"New game icon"}
+                  fill
+                />
+              </figure>
+            </section>
+          )}
+        </>
+      )} */}
+
+      <section
+        onClick={createGameWithPencil}
+        className="z-[99] fixed bottom-[100px] right-[22px] w-[60px] h-[60px] bg-[#2B2930] rounded-[17px] flex justify-center items-center"
+      >
+        <figure className="relative w-[20px] h-[20px]">
+          <Image
+            src={"/assets/icons/new-game.svg"}
+            alt={"New game icon"}
+            fill
+          />
+        </figure>
+      </section>
 
       {currentPage == "Game Lobby" && (
         <GameLobby
+          setUserData={setUserData}
+          userData={userData}
+          walletErr={walletErr}
+          walletAddress={walletAddress}
+          tonConnectUI={tonConnectUI}
+          walletLoaded={walletLoaded}
+          handleWalletClick={handleWalletClick}
           chatId={chatId}
           token={token}
           setCurrentPage={setCurrentPage}

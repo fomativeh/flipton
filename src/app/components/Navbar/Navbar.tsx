@@ -5,13 +5,14 @@ import Image from "next/image";
 type NavbarProps = {
   currentPage: string;
   setCurrentPage: Dispatch<SetStateAction<string>>;
+  photo: string;
 };
 
 type pagesProps = {
   title: string;
   iconName: string;
 };
-const Navbar = ({ currentPage, setCurrentPage }: NavbarProps) => {
+const Navbar = ({ currentPage, setCurrentPage, photo }: NavbarProps) => {
   const pages: pagesProps[] = [
     { title: "Game Lobby", iconName: "gameLobby" },
     { title: "Leaderboard", iconName: "leaderboard" },
@@ -24,19 +25,36 @@ const Navbar = ({ currentPage, setCurrentPage }: NavbarProps) => {
       <ul className="flex justify-evenly px-[4px] items-center w-full list-none">
         {pages.map((eachPage, i) => {
           return (
-            <li key={i} className="flex flex-col justify-center items-center" onClick={()=>setCurrentPage(eachPage.title)}>
+            <li
+              key={i}
+              className="flex flex-col justify-center items-center"
+              onClick={() => setCurrentPage(eachPage.title)}
+            >
               <section
                 className={`px-[20px] py-[8px] rounded-[20px] ${
                   currentPage == eachPage.title ? `bg-[#4A4458]` : `bg-none`
                 } mb-[5px]`}
               >
-                <figure className="w-[24px] h-[24px] relative">
-                  <Image
-                    src={`/assets/icons/${eachPage.iconName}.svg`}
-                    alt={"Nav icon"}
-                    fill
-                  />
-                </figure>
+                {eachPage.title == "Profile" ? (
+                  <>
+                   <figure className="w-[24px] h-[24px] relative rounded-[50px]">
+                    <Image
+                      src={photo?photo:`/assets/icons/profile.svg`}
+                      alt={"Nav icon"}
+                      fill
+                      className="rounded-[inherit]"
+                    />
+                  </figure>
+                  </>
+                ) : (
+                  <figure className="w-[24px] h-[24px] relative">
+                    <Image
+                      src={`/assets/icons/${eachPage.iconName}.svg`}
+                      alt={"Nav icon"}
+                      fill
+                    />
+                  </figure>
+                )}
               </section>
               <span
                 className={`font-[Roboto] text-[14px] ${

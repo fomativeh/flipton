@@ -1,6 +1,9 @@
 "use client";
 import { createNewGame } from "@/api/user";
 import GameLobbyCard from "@/app/components/GameLobbyCard/GameLobbyCard";
+import TopHeader from "@/app/components/TopHeader/TopHeader";
+import { User } from "@/types/userType";
+import { TonConnectUI } from "@tonconnect/ui-react";
 import Image from "next/image";
 import React, { Dispatch, SetStateAction, useEffect, useState } from "react";
 
@@ -8,25 +11,54 @@ type Props = {
   avatar: string;
   name: String;
   setCurrentPage: Dispatch<SetStateAction<string>>;
-  chatId:number,
-  token:string,
-  showGamesList:boolean,
-  setIsCreatingGame:Dispatch<SetStateAction<boolean>>,
-  isCreatingGame:boolean,
-  showCreatedModal:boolean
-  showGameplayModal:boolean,
-  showGameResult:boolean,
-  setShowGamesList:Dispatch<SetStateAction<boolean>>,
-  setShowCreatedModal:Dispatch<SetStateAction<boolean>>,
-  setShowGameplayModal:Dispatch<SetStateAction<boolean>>,
-  setShowGameResult:Dispatch<SetStateAction<boolean>>
+  chatId: number;
+  token: string;
+  showGamesList: boolean;
+  setIsCreatingGame: Dispatch<SetStateAction<boolean>>;
+  isCreatingGame: boolean;
+  showCreatedModal: boolean;
+  showGameplayModal: boolean;
+  showGameResult: boolean;
+  setShowGamesList: Dispatch<SetStateAction<boolean>>;
+  setShowCreatedModal: Dispatch<SetStateAction<boolean>>;
+  setShowGameplayModal: Dispatch<SetStateAction<boolean>>;
+  setShowGameResult: Dispatch<SetStateAction<boolean>>;
+  handleWalletClick: () => void;
+  walletLoaded: boolean;
+  tonConnectUI: TonConnectUI;
+  walletAddress: string;
+  walletErr: string;
+  userData: User;
+  setUserData: Dispatch<SetStateAction<User>>;
 };
 
-const GameLobby = ({ avatar, name, setCurrentPage, chatId, token, showCreatedModal,showGameResult, showGameplayModal, showGamesList, isCreatingGame, setShowCreatedModal, setShowGamesList, setShowGameplayModal,setShowGameResult, setIsCreatingGame }: Props) => {
-
+const GameLobby = ({
+  avatar,
+  walletErr,
+  name,
+  setCurrentPage,
+  chatId,
+  token,
+  showCreatedModal,
+  showGameResult,
+  showGameplayModal,
+  showGamesList,
+  isCreatingGame,
+  setShowCreatedModal,
+  setShowGamesList,
+  setShowGameplayModal,
+  setShowGameResult,
+  setIsCreatingGame,
+  walletLoaded,
+  handleWalletClick,
+  tonConnectUI,
+  walletAddress,
+  userData,
+  setUserData,
+}: Props) => {
   const [wagerAmount, setWagerAmount] = useState<string | null>(null);
   const [err, setErr] = useState<string>("");
-  
+
   const [coinSideSelected, setCoinSideSelected] = useState<"Head" | "Tail">(
     "Head"
   );
@@ -42,65 +74,49 @@ const GameLobby = ({ avatar, name, setCurrentPage, chatId, token, showCreatedMod
       return setTimeout(() => setErr(""), 2800);
     }
 
-    if (parseInt(wagerAmount) == 0) {
-      setErr("Wager amount must be greater than 0");
+    if (parseInt(wagerAmount) < 0.5) {
+      setErr("Valid wager amount = 0.5 upwards.");
       return setTimeout(() => setErr(""), 2800);
     }
 
     try {
-      const createNewGameRes = await createNewGame(chatId, token, parseInt(wagerAmount), coinSideSelected )
-      
+      const createNewGameRes = await createNewGame(
+        chatId,
+        token,
+        parseInt(wagerAmount),
+        coinSideSelected
+      );
+      if (createNewGameRes?.success) {
+        setUserData({ ...userData, waitingForPlayer2: true });
+      }
     } catch (error) {
       console.log(error);
     }
   };
 
-
-
-
   return (
-    <section className="page-bg w-full min-h-screen px-[20px] h-[100vh] overflow-y-auto relative">
+    <section className="page-bg w-full min-h-screen px-[20px] h-[100vh] overflow-y-auto relative flex flex-col justify-start items-center">
       <h1
         className="gamelobby-title font-[Poppins] font-medium text-[32px] mt-[25px] text-center"
         style={{ visibility: `${showGamesList ? `visible` : `hidden`}` }}
       >
         FlipTON
       </h1>
-      <section
-        className={`${
-          showGamesList ? `mt-[20px]` : `mt-[-10px]`
-        } w-full flex justify-between items-center`}
-      >
-        <section className="flex justify-start items-center">
-          <figure className="mr-[10px] relative w-[18px] h-[18px] rounded-[50px]">
-            <Image
-              src={avatar ? avatar : `/assets/icons/avatar.svg`}
-              alt="Avatar icon"
-              fill
-              className="rounded-[inherit]"
-            />
-          </figure>
-          <span className="font-[Poppins] text-[12px] text-white">
-            {name || "..."}
-          </span>
-        </section>
 
-        <section
-          className="flex justify-start items-center leaderboard-mini-card px-[10px] py-[4px] rounded-[5px]"
-          onClick={() => setCurrentPage("Leaderboard")}
-        >
-          <figure className="mr-[5px] relative w-[16px] h-[16px]">
-            <Image
-              src={"/assets/icons/leaderboard-2.svg"}
-              alt="Leaderboard icon"
-              fill
-            />
-          </figure>
-          <span className="font-[Poppins] text-[12px] text-white font-medium">
-            Leaderboard
-          </span>
-        </section>
-      </section>
+      <TopHeader
+        walletAddress={walletAddress}
+        tonConnectUI={tonConnectUI}
+        walletLoaded={walletLoaded}
+        name={name as string}
+        handleWalletClick={handleWalletClick}
+        avatar={avatar}
+        showGamesList={showGamesList}
+      />
+      {walletErr && (
+        <p className="text-red-300 mt-[10px] text-center max-w-[85%]">
+          {walletErr}
+        </p>
+      )}
 
       {showGamesList && (
         <section className="w-full mt-[30px] flex flex-col justify-start items-start mb-[150px]">
@@ -185,7 +201,7 @@ const GameLobby = ({ avatar, name, setCurrentPage, chatId, token, showCreatedMod
         <section className="absolute w-full h-full top-0 left-0 flex flex-col justify-center items-center">
           <section className="flex justify-start items-center mb-[5px]">
             <span className="font-[Poppins] text-[36px] font-medium text-white mr-[10px]">
-              50
+              {wagerAmount}
             </span>
             <figure className="w-[32px] h-[32px] relative">
               <Image src={"/assets/icons/coin.png"} alt="Coin icon" fill />

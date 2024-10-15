@@ -15,17 +15,6 @@ const GameLobbyCard = ({ setIsCreatingGame, inProgress }: Props) => {
 
   return (
     <section className="my-[15px] fade-card w-full rounded-[8px] px-[15px] py-[10px] flex justify-between items-center relative">
-      {/* New game card */}
-      <section onClick={()=>setIsCreatingGame(true)} className="fixed bottom-[100px] right-[22px] w-[60px] h-[60px] bg-[#2B2930] rounded-[17px] flex justify-center items-center">
-        <figure className="relative w-[20px] h-[20px]">
-          <Image
-            src={"/assets/icons/new-game.svg"}
-            alt={"New game icon"}
-            fill
-          />
-        </figure>
-      </section>
-
 
       <section className="flex flex-col justify-center items-start text-white font-[Poppins]">
         <span>Vishisht Kapoor</span>
