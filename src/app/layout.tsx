@@ -3,7 +3,7 @@ import "./globals.css";
 import Script from "next/script";
 import React from "react";
 import dynamic from "next/dynamic";
-import "aos/dist/aos.css"
+import "aos/dist/aos.css";
 import Loader from "./components/Loader/Loader";
 
 // Load the client-side layout dynamically
@@ -23,7 +23,9 @@ const RootLayout = ({ children }: { children: React.ReactNode }) => {
         />
       </head>
       <body className="flex justify-center items-center bg-[#000]">
-        <CSRRootLayout>{children}</CSRRootLayout>
+        <section className="flex justify-center items-center max-w-[400px]">
+          <CSRRootLayout>{children}</CSRRootLayout>
+        </section>
       </body>
     </html>
   );

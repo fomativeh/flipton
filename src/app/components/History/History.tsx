@@ -1,5 +1,14 @@
+import { Transaction } from "@/types/userType";
 import Image from "next/image";
 import React from "react";
+
+type Props = {
+  avatar: string;
+  balance: number;
+  transactions: Transaction;
+  name: string;
+  username: string;
+};
 
 const History = () => {
   return (

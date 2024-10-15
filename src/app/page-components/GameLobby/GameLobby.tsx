@@ -1,46 +1,32 @@
 "use client";
+import { createNewGame } from "@/api/user";
 import GameLobbyCard from "@/app/components/GameLobbyCard/GameLobbyCard";
 import Image from "next/image";
-import React, { useEffect, useState } from "react";
+import React, { Dispatch, SetStateAction, useEffect, useState } from "react";
 
-const GameLobby = () => {
-  const [showGamesList, setShowGameList] = useState<boolean>(true);
-  const [isCreatingGame, setIsCreatingGame] = useState<boolean>(false);
-  const [showCreatedModal, setShowCreatedModal] = useState<boolean>(false);
-  const [showGameplayModal, setShowGameplayModal] = useState<boolean>(false);
-  const [showGameResult, setShowGameResult] = useState<boolean>(false);
+type Props = {
+  avatar: string;
+  name: String;
+  setCurrentPage: Dispatch<SetStateAction<string>>;
+  chatId:number,
+  token:string,
+  showGamesList:boolean,
+  setIsCreatingGame:Dispatch<SetStateAction<boolean>>,
+  isCreatingGame:boolean,
+  showCreatedModal:boolean
+  showGameplayModal:boolean,
+  showGameResult:boolean,
+  setShowGamesList:Dispatch<SetStateAction<boolean>>,
+  setShowCreatedModal:Dispatch<SetStateAction<boolean>>,
+  setShowGameplayModal:Dispatch<SetStateAction<boolean>>,
+  setShowGameResult:Dispatch<SetStateAction<boolean>>
+};
 
-  useEffect(() => {
-    if (isCreatingGame) {
-      setShowGameList(false);
-    }
-  }, [isCreatingGame]);
+const GameLobby = ({ avatar, name, setCurrentPage, chatId, token, showCreatedModal,showGameResult, showGameplayModal, showGamesList, isCreatingGame, setShowCreatedModal, setShowGamesList, setShowGameplayModal,setShowGameResult, setIsCreatingGame }: Props) => {
 
-  useEffect(() => {
-    if (showCreatedModal) {
-      setIsCreatingGame(false);
-    }
-  }, [showCreatedModal]);
-
-  useEffect(() => {
-    if (showGameplayModal) {
-      setShowCreatedModal(false);
-    }
-  }, [showGameplayModal]);
-
-  useEffect(() => {
-    if (showGameResult) {
-      setShowGameResult(true);
-    }
-  }, [showGameResult]);
-
-  useEffect(() => {
-    if (showGamesList) {
-      setShowGameResult(false);
-      setShowGameplayModal(false);
-    }
-  }, [showGamesList]);
-
+  const [wagerAmount, setWagerAmount] = useState<string | null>(null);
+  const [err, setErr] = useState<string>("");
+  
   const [coinSideSelected, setCoinSideSelected] = useState<"Head" | "Tail">(
     "Head"
   );
@@ -49,6 +35,28 @@ const GameLobby = () => {
     // This function sets the selected coin side and resets the other.
     setCoinSideSelected(side);
   };
+
+  const createGame = async () => {
+    if (!wagerAmount) {
+      setErr("Wager amount is required.");
+      return setTimeout(() => setErr(""), 2800);
+    }
+
+    if (parseInt(wagerAmount) == 0) {
+      setErr("Wager amount must be greater than 0");
+      return setTimeout(() => setErr(""), 2800);
+    }
+
+    try {
+      const createNewGameRes = await createNewGame(chatId, token, parseInt(wagerAmount), coinSideSelected )
+      
+    } catch (error) {
+      console.log(error);
+    }
+  };
+
+
+
 
   return (
     <section className="page-bg w-full min-h-screen px-[20px] h-[100vh] overflow-y-auto relative">
@@ -64,15 +72,23 @@ const GameLobby = () => {
         } w-full flex justify-between items-center`}
       >
         <section className="flex justify-start items-center">
-          <figure className="mr-[10px] relative w-[18px] h-[18px]">
-            <Image src={"/assets/icons/avatar.svg"} alt="Avatar icon" fill />
+          <figure className="mr-[10px] relative w-[18px] h-[18px] rounded-[50px]">
+            <Image
+              src={avatar ? avatar : `/assets/icons/avatar.svg`}
+              alt="Avatar icon"
+              fill
+              className="rounded-[inherit]"
+            />
           </figure>
           <span className="font-[Poppins] text-[12px] text-white">
-            John Doe
+            {name || "..."}
           </span>
         </section>
 
-        <section className="flex justify-start items-center leaderboard-mini-card px-[10px] py-[4px] rounded-[5px]">
+        <section
+          className="flex justify-start items-center leaderboard-mini-card px-[10px] py-[4px] rounded-[5px]"
+          onClick={() => setCurrentPage("Leaderboard")}
+        >
           <figure className="mr-[5px] relative w-[16px] h-[16px]">
             <Image
               src={"/assets/icons/leaderboard-2.svg"}
@@ -88,7 +104,10 @@ const GameLobby = () => {
 
       {showGamesList && (
         <section className="w-full mt-[30px] flex flex-col justify-start items-start mb-[150px]">
-          <GameLobbyCard setIsCreatingGame={setIsCreatingGame} />
+          <GameLobbyCard
+            setIsCreatingGame={setIsCreatingGame}
+            inProgress={true}
+          />
           <GameLobbyCard setIsCreatingGame={setIsCreatingGame} />
           <GameLobbyCard setIsCreatingGame={setIsCreatingGame} />
           <GameLobbyCard setIsCreatingGame={setIsCreatingGame} />
@@ -119,7 +138,9 @@ const GameLobby = () => {
             </figure>
 
             <input
-              type="text"
+              value={wagerAmount as string}
+              onChange={(e) => setWagerAmount(e.target.value)}
+              type="number"
               className="border-b-[2px] border-b-[#6B5F82] w-[140px] h-[40px] outline-none text-white font-[Poppins] bg-transparent"
             />
           </section>
@@ -149,8 +170,10 @@ const GameLobby = () => {
             </span>
           </section>
 
+          {err && <p className="text-red-300 my-[10px]">{err}</p>}
+
           <span
-            onClick={() => setShowCreatedModal(true)}
+            onClick={createGame}
             className="mt-[50px] w-[151px] h-[32px] flex justify-center items-center rounded-[4px] text-[#381E72] bg-[#D0BCFF] font-[Roboto] font-medium text-[14px]"
           >
             Create New Game
@@ -232,7 +255,7 @@ const GameLobby = () => {
               </span>
 
               <span
-                onClick={() => setShowGameList(true)}
+                onClick={() => setShowGamesList(true)}
                 className="mt-[30px] w-[108px] h-[32px] flex justify-center items-center rounded-[4px] text-[#381E72] bg-[#D0BCFF] font-[Roboto] font-medium text-[14px]"
               >
                 Play Again
