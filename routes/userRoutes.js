@@ -81,6 +81,11 @@ userRoutes.post("/:chatId/newGame", async (req, res) => {
       ...newGameDetails,
       status: "waiting",
     };
+    //Update user account state
+    userDetails.waitingForPlayer2 = true;
+    await userDetails.save();
+
+    res.status(201).json({ success: true, data: "Game created successfully" });
 
     sendToAllClients("new_game", dataForSocketClient);
   } catch (error) {

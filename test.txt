@@ -1,0 +1,31 @@
+#Generated
+ADDRESS = kQCH3JsYd1QdfSCkUSd73MvODBnkHDEN7qPgrCsietSWAi26
+PHRASE = foot east rookie venture sting motion convince recycle live series circle mistake spatial solution accident misery post omit soap whale range age ring range
+
+
+  const MNEMONICS = [
+    "cousin",
+    "affair",
+    "give",
+    "nephew",
+    "wagon",
+    "bulb",
+    "awkward",
+    "improve",
+    "tobacco",
+    "moon",
+    "age",
+    "utility",
+    "awesome",
+    "problem",
+    "scrub",
+    "soul",
+    "sibling",
+    "evidence",
+    "father",
+    "rhythm",
+    "thumb",
+    "capable",
+    "depart",
+    "climb",
+  ];

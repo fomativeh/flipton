@@ -20,6 +20,8 @@ const path = require("path");
 const userRoutes = require("./routes/UserRoutes");
 const ConnectedUser = require("./models/ConnectedUserModel");
 const socketIo = require("socket.io");
+const gameRoutes = require("./routes/gameRoutes");
+
 
 const server = http.createServer(app);
 global.io = socketIo(server, {
@@ -59,6 +61,8 @@ app.use((req, res, next) => {
 app.use(rateLimitMiddleware);
 
 app.use("/user", authMiddleware, userRoutes);
+app.use("/game", authMiddleware, gameRoutes);
+
 
 //Root route response
 app.get("/", async (req, res) => {
@@ -97,7 +101,7 @@ global.io.on("connection", (socket) => {
 
   // Register user on connection
   socket.on("register", async (chatId) => {
-    console.log(chatId)
+    console.log(chatId);
     try {
       // Save the userId and socketId to the database
       await ConnectedUser.findOneAndUpdate(
