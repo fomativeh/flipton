@@ -140,7 +140,7 @@ const GameLobby = ({
       return setTimeout(() => setErr(""), 2800);
     }
 
-    if (parseInt(wagerAmount) < 0.5) {
+    if (parseFloat(wagerAmount) < 0.5) {
       setErr("Valid wager amount = 0.5 upwards");
       return setTimeout(() => setErr(""), 2800);
     }
@@ -178,7 +178,7 @@ const GameLobby = ({
         const createNewGameRes = await createNewGame(
           chatId,
           token,
-          parseInt(wagerAmount),
+          parseFloat(wagerAmount),
           coinSideSelected
         );
         if (createNewGameRes?.success) {
