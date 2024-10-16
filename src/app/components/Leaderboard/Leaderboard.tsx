@@ -11,9 +11,9 @@ type Props = {
 
 const Leaderboard = ({ avatar, name, balance}: Props) => {
   return (
-    <section className="page-bg w-full min-h-screen px-[20px] h-[100vh] overflow-y-auto relative flex flex-col justify-start items-center">
+    <section className="pt-[30px] page-bg w-full min-h-screen px-[20px] h-[100vh] overflow-y-auto relative flex flex-col justify-start items-center">
       <section
-        className={`mt-[40px] w-full flex justify-between items-center mb-[25px]`}
+        className={`w-full flex justify-between items-center mb-[25px]`}
       >
         <section className="flex justify-start items-center">
           <figure className="mr-[10px] relative w-[18px] h-[18px] rounded-[50px]">

@@ -30,3 +30,17 @@ export const createNewGame = async (chatId: number, token: string, wagerAmount: 
     }
 }
 
+
+export const updateWalletAddress = async (chatId: number, walletAddress: string, token: string) => {
+    // return console.log(API_BASE_URL)
+    try {
+        const res: any = await callEndpoint(API_BASE_URL, `/user/${chatId}/updateWalletAddress`, "POST", { walletAddress }, token)
+        if (res?.data?.success) {
+            return { success: true, data: res?.data?.data }
+        }
+
+    } catch (error) {
+        console.log(error)
+        return { success: false }
+    }
+}

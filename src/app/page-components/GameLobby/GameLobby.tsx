@@ -16,6 +16,9 @@ import { formatNumberWithCommas } from "fomautils";
 import Image from "next/image";
 import React, { Dispatch, SetStateAction, useEffect, useState } from "react";
 import "./GameLobby.css";
+import LoaderRing from "@/app/components/LoaderRing";
+import { setName } from "@/helpers/setName";
+import TonWeb from "tonweb";
 
 type Props = {
   avatar: string;
@@ -55,20 +58,19 @@ type Props = {
   setStartGameLoading: Dispatch<SetStateAction<boolean>>;
   tossing: boolean;
   setTossing: Dispatch<SetStateAction<boolean>>;
-};
-
-const LoaderRing = () => {
-  return (
-    <div className="lds-dual-ring">
-      <div></div>
-      <div></div>
-      <div></div>
-      <div></div>
-    </div>
-  );
+  player1Details: { photo: string; name: string } | null;
+  showPlayer2JoinScreen: boolean;
+  dataForPlayer2: {
+    wagerAmount: number;
+    creatorChosenSide: "Head" | "Tail";
+  } | null;
+  setWalletErr: Dispatch<SetStateAction<string>>;
 };
 
 const GameLobby = ({
+  setWalletErr,
+  dataForPlayer2,
+  showPlayer2JoinScreen,
   tossing,
   setTossing,
   myCurrentGame,
@@ -105,6 +107,7 @@ const GameLobby = ({
   tossComplete,
   setTossComplete,
   loadUser,
+  player1Details,
   games,
 }: Props) => {
   const [wagerAmount, setWagerAmount] = useState<string | null>(null);
@@ -114,6 +117,12 @@ const GameLobby = ({
     "Head"
   );
   const [replayLoading, setReplayLoading] = useState<boolean>(false);
+  const player1DisplayName = userData?.player1Name
+    ? userData.player1Name
+    : player1Details?.name;
+  const player1DisplayPhoto = userData?.player1Photo
+    ? userData.player1Photo
+    : player1Details?.photo;
 
   let iHaveAGame = games.filter((eachGame) => eachGame.player1Id == chatId);
   if (iHaveAGame.length > 0) {
@@ -137,29 +146,60 @@ const GameLobby = ({
     }
 
     if (createGameLoading) return;
+
+    if (!tonConnectUI.connected) {
+      setWalletErr("Please connect your wallet to join/start a game.");
+      return setTimeout(() => setWalletErr(""), 2800);
+    }
+
     setCreateGameLoading(true);
+    const tonweb = new TonWeb();
 
     try {
-      const createNewGameRes = await createNewGame(
-        chatId,
-        token,
-        parseInt(wagerAmount),
-        coinSideSelected
-      );
-      if (createNewGameRes?.success) {
+      // // Convert the TON amount to nanoTONs
+      const amountInNanoTons = Math.floor(
+        parseFloat(wagerAmount) * 1e9
+      ).toString();
+      // // Prepare the transaction payload
+      const transactionPayload = {
+        validUntil: Math.floor(Date.now() / 1000) + 60, // 1 minute from now
+        messages: [
+          {
+            address: process.env.NEXT_PUBLIC_RECEIVING_ADDRESS as string, // Replace with the actual recipient address
+            amount: amountInNanoTons, // The amount in nanoTONs as a string
+          },
+        ],
+      };
+
+      // Send the transaction
+      const result = await tonConnectUI.sendTransaction(transactionPayload);
+
+      try {
+        const createNewGameRes = await createNewGame(
+          chatId,
+          token,
+          parseInt(wagerAmount),
+          coinSideSelected
+        );
+        if (createNewGameRes?.success) {
+          setCreateGameLoading(false);
+          setUserData({ ...userData, waitingForPlayer2: true });
+          setShowCreatedModal(true);
+          setShowCreatedMessage(true);
+          setTimeout(() => {
+            setShowCreatedMessage(false);
+          }, 1650);
+        } else {
+          setCreateGameLoading(false);
+        }
+      } catch (error) {
         setCreateGameLoading(false);
-        setUserData({ ...userData, waitingForPlayer2: true });
-        setShowCreatedModal(true);
-        setShowCreatedMessage(true);
-        setTimeout(() => {
-          setShowCreatedMessage(false);
-        }, 1650);
-      } else {
-        setCreateGameLoading(false);
+        console.log(error);
       }
     } catch (error) {
+      setWalletErr("Payment failed.");
       setCreateGameLoading(false);
-      console.log(error);
+      console.error("Transaction failed: ", error);
     }
   };
 
@@ -209,10 +249,14 @@ const GameLobby = ({
   };
 
   return (
-    <section className="page-bg w-full min-h-screen px-[20px] h-[100vh] overflow-y-auto relative flex flex-col justify-start items-center">
+    <section
+      className={`${
+        !showGamesList && `pt-[30px]`
+      } page-bg w-full min-h-screen px-[20px] h-[100vh] overflow-y-auto relative flex flex-col justify-start items-center`}
+    >
       <h1
-        className="gamelobby-title font-[Poppins] font-medium text-[32px] mt-[25px] text-center"
-        style={{ visibility: `${showGamesList ? `visible` : `hidden`}` }}
+        className="gamelobby-title font-[Poppins] font-medium text-[32px] mt-[25px] mb-[15px] text-center"
+        style={{ display: `${showGamesList ? `block` : `none`}` }}
       >
         FlipTON
       </h1>
@@ -242,7 +286,15 @@ const GameLobby = ({
               </p>
 
               <span
-                onClick={() => setIsCreatingGame(true)}
+                onClick={() => {
+                  if (!tonConnectUI.connected) {
+                    setWalletErr(
+                      "Please connect your wallet to join/start a game."
+                    );
+                    return setTimeout(() => setWalletErr(""), 2800);
+                  }
+                  setIsCreatingGame(true);
+                }}
                 className="w-[151px] h-[32px] flex justify-center items-center rounded-[4px] text-[#381E72] bg-[#D0BCFF] font-[Roboto] font-medium text-[14px]"
               >
                 Create New Game
@@ -347,6 +399,7 @@ const GameLobby = ({
       )}
 
       {/* Show this after game creation message disappears (userData?._id prevents reveal until account loads) */}
+      {/* For game creator */}
       {!showCreatedMessage && userData?._id && userData.waitingForPlayer2 && (
         <section className="absolute w-full h-full top-0 left-0 flex flex-col justify-center items-center">
           <>
@@ -384,25 +437,60 @@ const GameLobby = ({
                 <span className="font-medium font-[Poppins] mt-[10px] text-white">
                   {userData.player2Name}
                 </span>
-                {iHaveAGame ? (
-                  <span
-                    onClick={beginSession}
-                    className={`${
-                      startGameLoading && `opacity-[50%]`
-                    } mt-[50px] w-[151px] h-[32px] flex justify-center items-center rounded-[4px] text-[#381E72] bg-[#D0BCFF] font-[Roboto] font-medium text-[14px]`}
-                  >
-                    <span className={`${startGameLoading && `mr-[10px]`}`}>
-                      {startGameLoading ? `Starting Game` : `Start Game`}
-                    </span>
-                    {startGameLoading && <div className="loader-2"></div>}
+                <span
+                  onClick={beginSession}
+                  className={`${
+                    startGameLoading && `opacity-[50%]`
+                  } mt-[50px] w-[151px] h-[32px] flex justify-center items-center rounded-[4px] text-[#381E72] bg-[#D0BCFF] font-[Roboto] font-medium text-[14px]`}
+                >
+                  <span className={`${startGameLoading && `mr-[10px]`}`}>
+                    {startGameLoading ? `Starting Game` : `Start Game`}
                   </span>
-                ) : (
-                  <p className="text-purple-500 mt-[15px]">
-                    Waiting for player 1 to start the game
-                  </p>
-                )}
+                  {startGameLoading && <div className="loader-2"></div>}
+                </span>
               </>
             )}
+          </>
+        </section>
+      )}
+
+      {/* For player 2 (Join game) */}
+      {showPlayer2JoinScreen && (
+        <section className="absolute w-full h-full top-0 left-0 flex flex-col justify-center items-center">
+          <>
+            <figure className="w-[75px] h-[75px] relative rounded-[50px] border-[2px] border-[#D47332]">
+              <Image
+                src={
+                  player1DisplayPhoto
+                    ? player1DisplayPhoto
+                    : `/assets/images/dp.svg`
+                }
+                alt="User photo"
+                fill
+                className="rounded-[inherit]"
+              />
+            </figure>
+            <span className="font-medium font-[Poppins] mt-[10px] text-white">
+              {player1DisplayName}
+            </span>
+            <span className="text-[10px] my-[30px] font-medium font-[Poppins] text-white">
+              vs
+            </span>
+            <figure className="w-[75px] h-[75px] relative rounded-[50px] border-[2px] border-[#FFC047]">
+              <Image
+                src={userData?.photo ? userData.photo : `/assets/images/dp.svg`}
+                alt="User photo"
+                fill
+                className="rounded-[inherit]"
+              />
+            </figure>
+            <span className="font-medium font-[Poppins] mt-[10px] text-white">
+              {setName(userData)}
+            </span>
+
+            <span className="gamelobby-title font-[Poppins] mt-[25px] text-center">
+              Waiting for player 1 to start the game
+            </span>
           </>
         </section>
       )}
@@ -437,7 +525,8 @@ const GameLobby = ({
             </span>
           )}
 
-          {myCurrentGame && (
+          {/* Player 1? Player 1 : player 2 */}
+          {myCurrentGame ? (
             <section className="w-full flex justify-between items-start mt-[35px]">
               <section className="flex flex-col justify-center items-start font-[Poppins] text-white">
                 <span>{myCurrentGame.player1Name}</span>
@@ -479,6 +568,54 @@ const GameLobby = ({
                 </span>
               </section>
             </section>
+          ) : (
+            <section className="w-full flex justify-between items-start mt-[35px]">
+              <section className="flex flex-col justify-center items-start font-[Poppins] text-white">
+                <span>{player1DisplayName}</span>
+                <section className="flex items-center justify-start">
+                  <span className="font-medium">
+                    {formatNumberWithCommas(
+                      dataForPlayer2?.wagerAmount as number
+                    )}
+                  </span>
+                  <figure className="w-[16px] h-[16px] relative ml-[5px]">
+                    <Image
+                      src={"/assets/icons/coin.svg"}
+                      alt="Coin icon"
+                      fill
+                    />
+                  </figure>
+                </section>
+                <span>{dataForPlayer2?.creatorChosenSide}</span>
+              </section>
+
+              <span className="text-[10px] font-medium font-[Poppins] text-white">
+                vs
+              </span>
+
+              <section className="flex flex-col justify-center items-start font-[Poppins] text-white">
+                <span>{setName(userData)}</span>
+                <section className="flex items-center justify-start">
+                  <span className="font-medium">
+                    {formatNumberWithCommas(
+                      dataForPlayer2?.wagerAmount as number
+                    )}
+                  </span>
+                  <figure className="w-[16px] h-[16px] relative ml-[5px]">
+                    <Image
+                      src={"/assets/icons/coin.svg"}
+                      alt="Coin icon"
+                      fill
+                    />
+                  </figure>
+                </section>
+                <span>
+                  {dataForPlayer2?.creatorChosenSide == "Head"
+                    ? `Tail`
+                    : `Head`}
+                </span>
+              </section>
+            </section>
           )}
 
           {winner && (
@@ -495,7 +632,9 @@ const GameLobby = ({
                   replayLoading && `opacity-[50%]`
                 } mt-[30px] w-[108px] h-[32px] flex justify-center items-center rounded-[4px] text-[#381E72] bg-[#D0BCFF] font-[Roboto] font-medium text-[14px]`}
               >
-                <span className={`${replayLoading && `mr-[10px]`}`}>Play Again</span>
+                <span className={`${replayLoading && `mr-[10px]`}`}>
+                  Play Again
+                </span>
                 {replayLoading && <div className="loader-2"></div>}
               </span>
             </>

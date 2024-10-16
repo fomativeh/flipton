@@ -1,4 +1,4 @@
-import { Transaction } from "@/types/userType";
+import { GameHistory, Transaction } from "@/types/userType";
 import Image from "next/image";
 import React from "react";
 import TopHeader from "../TopHeader/TopHeader";
@@ -11,14 +11,8 @@ import { TonConnectUI } from "@tonconnect/ui-react";
 //   name: string;
 //   username: string;
 // };
-type HistoryProps = {
-  won: boolean;
-  opponent: string;
-  amount: number;
-  date: string;
-};
 type PageProps = {
-  history: HistoryProps[];
+  history: GameHistory[];
   walletAddress?: string;
   tonConnectUI: TonConnectUI;
   walletLoaded: boolean;
@@ -57,7 +51,7 @@ const History = (props: PageProps) => {
     walletAddress,
   } = props;
   return (
-    <section className="page-bg w-full min-h-screen px-[20px] h-[100vh] overflow-y-auto relative flex flex-col justify-start items-center pb-[150px]">
+    <section className="pt-[30px] page-bg w-full min-h-screen px-[20px] h-[100vh] overflow-y-auto relative flex flex-col justify-start items-center pb-[150px]">
       <TopHeader
         walletAddress={walletAddress as string}
         tonConnectUI={tonConnectUI}
@@ -68,9 +62,9 @@ const History = (props: PageProps) => {
         showGamesList={showGamesList}
       />
 
-      <section className="mt-[10px] w-full flex justify-between items-center flex-wrap">
-        {history.length > 0 &&
-          history.map((eachHistory, i) => {
+      <section className="mt-[30px] w-full flex justify-between items-center flex-wrap">
+        {history?.length > 0 &&
+          history?.map((eachHistory, i) => {
             return (
               <section
                 key={i}
@@ -86,8 +80,12 @@ const History = (props: PageProps) => {
                 <section className="w-full flex justify-start items-center mb-[10px]">
                   <figure className="mr-[15px] relative w-[20px] h-[20px]">
                     <Image
-                      src={"/assets/icons/user.svg"}
-                      alt="User icon"
+                      src={
+                        eachHistory.opponentPhoto
+                          ? eachHistory.opponentPhoto
+                          : "/assets/icons/user.svg"
+                      }
+                      alt="User Photo"
                       fill
                     />
                   </figure>

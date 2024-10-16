@@ -13,17 +13,18 @@ import Leaderboard from "./components/Leaderboard/Leaderboard";
 import Profile from "./components/Profile/Profile";
 import History from "./components/History/History";
 import { GameHistory, Transaction, User } from "@/types/userType";
-import { fetchUserAccount } from "@/api/user";
+import { fetchUserAccount, updateWalletAddress } from "@/api/user";
 import { setName } from "@/helpers/setName";
 import { gameType } from "@/types/gameType";
 import { botSocketHandler } from "@/helpers/botSocketHandler";
 import Image from "next/image";
 import { fetchOpenGames } from "@/api/game";
 import { winnerType } from "@/types/winnerType";
+import SplashScreen from "./components/SplashScreen/SplashScreen";
 
 const Home = () => {
-  let chatId = 6450051353;
-  // let chatId = 1645873626
+  // let chatId = 6450051353;
+  let chatId = 1645873626;
   let token = "";
   const [games, setGames] = useState<gameType[]>([]);
   const [showGamesList, setShowGamesList] = useState<boolean>(true);
@@ -38,12 +39,30 @@ const Home = () => {
   const [winner, setWinner] = useState<winnerType>(null);
   const [myCurrentGame, setMyCurrentGame] = useState<any>(null);
   const [tossing, setTossing] = useState<boolean>(false);
+  const [player1Details, setPlayer1Details] = useState<{
+    photo: string;
+    name: string;
+  } | null>(null);
+  const [showPlayer2JoinScreen, setShowPlayer2JoinScreen] =
+    useState<boolean>(false);
+  const [dataForPlayer2, setDataForPlayer2] = useState<{
+    wagerAmount: number;
+    creatorChosenSide: "Head" | "Tail";
+  } | null>(null);
 
   // useEffect(() => {
   //   if (userData?.waitingForPlayer2) {
 
   //   }
   // }, [userData?.waitingForPlayer2]);
+
+  useEffect;
+  useEffect(() => {
+    if (player1Details) {
+      setShowGamesList(false);
+      setShowPlayer2JoinScreen(true);
+    }
+  }, [player1Details]);
 
   useEffect(() => {
     if (userData?.waitingForPlayer2) {
@@ -53,6 +72,12 @@ const Home = () => {
     if (userData?.gameOngoing) {
       setShowGamesList(false);
       setShowGameplayModal(true);
+    }
+
+    //If user joined a game as player 2
+    if (userData?.player1Name) {
+      setShowGamesList(false);
+      setShowPlayer2JoinScreen(true);
     }
   }, [userData]);
 
@@ -121,7 +146,9 @@ const Home = () => {
       setGames,
       setUserData,
       setWinner,
-      setTossing
+      setTossing,
+      setPlayer1Details,
+      setDataForPlayer2
     );
 
     // Cleanup on unmount
@@ -145,7 +172,7 @@ const Home = () => {
     // Correctly typing the interval ID for both Node.js and browser
     const intervalId: ReturnType<typeof setInterval> = setInterval(() => {
       let loader = document.querySelector(".go121314943");
-      // console.log(loader);
+      console.log(loader);
       if (!loader) {
         setWalletLoaded(true);
         clearInterval(intervalId); // Clear the interval to stop it
@@ -168,10 +195,10 @@ const Home = () => {
   const [walletErr, setWalletErr] = useState<string>("");
 
   const createGameWithPencil = () => {
-    // if (!tonConnectUI.connected) {
-    //   setWalletErr("Please connect your wallet to join/start a game.");
-    //   return setTimeout(() => setWalletErr(""), 2800);
-    // }
+    if (!tonConnectUI.connected) {
+      setWalletErr("Please connect your wallet to join/start a game.");
+      return setTimeout(() => setWalletErr(""), 2800);
+    }
 
     setIsCreatingGame(true);
   };
@@ -193,6 +220,24 @@ const Home = () => {
   const [currentPage, setCurrentPage] = useState<string>("Game Lobby");
   const [createGameLoading, setCreateGameLoading] = useState<boolean>(false);
   const [startGameLoading, setStartGameLoading] = useState<boolean>(false);
+
+  const walletAddressCronJob = async () => {
+    const userWalletAddress = userData?.walletAddress;
+
+    //Update Wallet address in db
+    if (tonConnectUI.connected) {
+      if (!userWalletAddress || userWalletAddress != walletAddress) {
+        //Update wallet address
+        await updateWalletAddress(chatId, walletAddress, "")
+
+        //Repeat after 2 minutes
+        setTimeout(() => {
+          walletAddressCronJob();
+        }, 1000 * 60);
+      }
+    }
+  };
+
   return (
     <main className="w-full h-[100vh] flex flex-col justify-start items-center">
       <TonConnectButton className="hidden" />
@@ -203,9 +248,9 @@ const Home = () => {
       />
       {/* New game card */}
 
-      {/* {walletLoaded && ( //Uncomment this before push
+      {walletLoaded && ( //Uncomment this before push
         <>
-          {tonConnectUI.connected && !isCreatingGame (
+          {tonConnectUI.connected && !isCreatingGame && (
             <section
               onClick={createGameWithPencil}
               className="z-[99] fixed bottom-[100px] right-[22px] w-[60px] h-[60px] bg-[#2B2930] rounded-[17px] flex justify-center items-center"
@@ -220,9 +265,9 @@ const Home = () => {
             </section>
           )}
         </>
-      )} */}
+      )}
 
-      <section
+      {/* <section
         onClick={createGameWithPencil}
         className="z-[99] fixed bottom-[100px] right-[22px] w-[60px] h-[60px] bg-[#2B2930] rounded-[17px] flex justify-center items-center"
       >
@@ -233,79 +278,89 @@ const Home = () => {
             fill
           />
         </figure>
-      </section>
+      </section> */}
 
-      {currentPage == "Game Lobby" && (
-        <GameLobby
-          setTossing={setTossing}
-          tossing={tossing}
-          startGameLoading={startGameLoading}
-          setStartGameLoading={setStartGameLoading}
-          createGameLoading={createGameLoading}
-          setCreateGameLoading={setCreateGameLoading}
-          myCurrentGame={myCurrentGame}
-          setMyCurrentGame={setMyCurrentGame}
-          loadUser={loadUser}
-          winner={winner}
-          setTossComplete={setTossComplete}
-          tossComplete={tossComplete}
-          games={games}
-          setShowCreatedMessage={setShowCreatedMessage}
-          showCreatedMessage={showCreatedMessage}
-          setUserData={setUserData}
-          userData={userData}
-          walletErr={walletErr}
-          walletAddress={walletAddress}
-          tonConnectUI={tonConnectUI}
-          walletLoaded={walletLoaded}
-          handleWalletClick={handleWalletClick}
-          chatId={chatId}
-          token={token}
-          setCurrentPage={setCurrentPage}
-          avatar={userData?.photo as string}
-          name={setName(userData)}
-          isCreatingGame={isCreatingGame}
-          setIsCreatingGame={setIsCreatingGame}
-          setShowCreatedModal={setShowCreatedModal}
-          setShowGameResult={setShowGameResult}
-          setShowGameplayModal={setShowGameplayModal}
-          setShowGamesList={setShowGamesList}
-          showCreatedModal={showCreatedModal}
-          showGameResult={showGameResult}
-          showGameplayModal={showGameplayModal}
-          showGamesList={showGamesList}
-        />
-      )}
+      {!userData?._id && <SplashScreen />}
 
-      {currentPage == "Leaderboard" && (
-        <Leaderboard
-          balance={userData?.balance as number}
-          avatar={userData?.photo as string}
-          name={setName(userData)}
-        />
-      )}
+      {userData?._id && (
+        <>
+          {currentPage == "Game Lobby" && (
+            <GameLobby
+              setWalletErr={setWalletErr}
+              dataForPlayer2={dataForPlayer2}
+              showPlayer2JoinScreen={showPlayer2JoinScreen}
+              player1Details={player1Details}
+              setTossing={setTossing}
+              tossing={tossing}
+              startGameLoading={startGameLoading}
+              setStartGameLoading={setStartGameLoading}
+              createGameLoading={createGameLoading}
+              setCreateGameLoading={setCreateGameLoading}
+              myCurrentGame={myCurrentGame}
+              setMyCurrentGame={setMyCurrentGame}
+              loadUser={loadUser}
+              winner={winner}
+              setTossComplete={setTossComplete}
+              tossComplete={tossComplete}
+              games={games}
+              setShowCreatedMessage={setShowCreatedMessage}
+              showCreatedMessage={showCreatedMessage}
+              setUserData={setUserData}
+              userData={userData}
+              walletErr={walletErr}
+              walletAddress={walletAddress}
+              tonConnectUI={tonConnectUI}
+              walletLoaded={walletLoaded}
+              handleWalletClick={handleWalletClick}
+              chatId={chatId}
+              token={token}
+              setCurrentPage={setCurrentPage}
+              avatar={userData?.photo as string}
+              name={setName(userData)}
+              isCreatingGame={isCreatingGame}
+              setIsCreatingGame={setIsCreatingGame}
+              setShowCreatedModal={setShowCreatedModal}
+              setShowGameResult={setShowGameResult}
+              setShowGameplayModal={setShowGameplayModal}
+              setShowGamesList={setShowGamesList}
+              showCreatedModal={showCreatedModal}
+              showGameResult={showGameResult}
+              showGameplayModal={showGameplayModal}
+              showGamesList={showGamesList}
+            />
+          )}
 
-      {currentPage == "Profile" && (
-        <Profile
-          avatar={userData?.photo as string}
-          balance={userData?.balance as number}
-          name={setName(userData)}
-          username={userData?.username as string}
-          transactions={userData?.transactions as Transaction[]}
-        />
-      )}
+          {currentPage == "Leaderboard" && (
+            <Leaderboard
+              balance={userData?.balance as number}
+              avatar={userData?.photo as string}
+              name={setName(userData)}
+            />
+          )}
 
-      {currentPage == "History" && (
-        <History
-          showGamesList={showGamesList}
-          walletAddress={walletAddress}
-          tonConnectUI={tonConnectUI}
-          walletLoaded={walletLoaded}
-          handleWalletClick={handleWalletClick}
-          avatar={userData?.photo as string}
-          name={setName(userData)}
-          history={userData?.history as GameHistory[]}
-        />
+          {currentPage == "Profile" && (
+            <Profile
+              avatar={userData?.photo as string}
+              balance={userData?.balance as number}
+              name={setName(userData)}
+              username={userData?.username as string}
+              transactions={userData?.transactions as Transaction[]}
+            />
+          )}
+
+          {currentPage == "History" && (
+            <History
+              showGamesList={showGamesList}
+              walletAddress={walletAddress}
+              tonConnectUI={tonConnectUI}
+              walletLoaded={walletLoaded}
+              handleWalletClick={handleWalletClick}
+              avatar={userData?.photo as string}
+              name={setName(userData)}
+              history={userData?.history as GameHistory[]}
+            />
+          )}
+        </>
       )}
     </main>
   );

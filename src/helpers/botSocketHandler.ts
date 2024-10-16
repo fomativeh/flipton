@@ -22,7 +22,14 @@ type gameOngoingEventType = {
     player2Name: string
 }
 
-export const botSocketHandler = (botSocket: any, gamesRef: MutableRefObject<gameType[] | null>, chatId: number, setGames: Dispatch<SetStateAction<gameType[]>>, setUserData: Dispatch<SetStateAction<User>>, setWinner: Dispatch<SetStateAction<winnerType>>, setTossing: Dispatch<SetStateAction<boolean>>) => {
+type player1StartedEvent = {
+    wagerAmount:number,
+    creatorChosenSide:"Head" | "Tail"
+} | null
+
+type player1DetailsType = {photo: string, name: string }
+
+export const botSocketHandler = (botSocket: any, gamesRef: MutableRefObject<gameType[] | null>, chatId: number, setGames: Dispatch<SetStateAction<gameType[]>>, setUserData: Dispatch<SetStateAction<User>>, setWinner: Dispatch<SetStateAction<winnerType>>, setTossing: Dispatch<SetStateAction<boolean>>, setPlayer1Details: Dispatch<SetStateAction<player1DetailsType | null>>, setDataForPlayer2:Dispatch<SetStateAction<player1StartedEvent>>) => {
     // Listen for connection to tasks socket server
     botSocket.on("connect", () => {
         console.log("conncted to bot socket server");
@@ -53,7 +60,6 @@ export const botSocketHandler = (botSocket: any, gamesRef: MutableRefObject<game
         });
 
         //Toss start
-        //Remove game
         botSocket.on("toss_started", () => {
             setTossing(true)
         })
@@ -66,10 +72,19 @@ export const botSocketHandler = (botSocket: any, gamesRef: MutableRefObject<game
             setGames(updatedGames)
         })
 
-
         //Game winner update
         botSocket.on("winner", (winner: winnerType) => {
             setWinner(winner)
+        })
+
+        //Player 1 info (for joining player)
+        botSocket.on("player1Details", (data: player1DetailsType) => {
+            setPlayer1Details(data)
+        })
+
+        //Player 1 started game
+        botSocket.on("player_1_started", (data:player1StartedEvent) => {
+            setDataForPlayer2(data)
         })
     });
 }

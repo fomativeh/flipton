@@ -22,9 +22,9 @@ const TopHeader = ({
 }: props) => {
   return (
     <section
-      className={`${
-        showGamesList ? `mt-[20px]` : `mt-[-10px]`
-      } w-full flex justify-between items-center`}
+      className="
+     z-[99999]
+       w-full flex justify-between items-center"
     >
       <section className="flex justify-start items-center">
         <figure className="mr-[10px] relative w-[18px] h-[18px] rounded-[50px]">
