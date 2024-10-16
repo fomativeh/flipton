@@ -21,11 +21,22 @@ import Image from "next/image";
 import { fetchOpenGames } from "@/api/game";
 import { winnerType } from "@/types/winnerType";
 import SplashScreen from "./components/SplashScreen/SplashScreen";
+import { initClosingBehavior, retrieveLaunchParams } from "@tma.js/sdk";
+import { useInitData, useViewport } from "@tma.js/sdk-react";
 
 const Home = () => {
-  // let chatId = 6450051353;
-  let chatId = 1645873626;
-  let token = "";
+  const [closingBehavior] = initClosingBehavior();
+  closingBehavior.enableConfirmation();
+  const viewport = useViewport();
+  const data = useInitData(); // Destructuring initData
+  const chatId = data?.user?.id as number;
+  viewport?.expand();
+  const { initDataRaw } = retrieveLaunchParams();
+  let token = initDataRaw as string
+
+  // // let chatId = 6450051353;
+  // let chatId = 1645873626;
+  // let token = "";
   const [games, setGames] = useState<gameType[]>([]);
   const [showGamesList, setShowGamesList] = useState<boolean>(true);
   const [isCreatingGame, setIsCreatingGame] = useState<boolean>(false);
@@ -205,7 +216,7 @@ const Home = () => {
 
   const loadOpenGames = async () => {
     try {
-      const loadOpenGamesRes = await fetchOpenGames(token);
+      const loadOpenGamesRes = await fetchOpenGames(token as string);
       if (loadOpenGamesRes?.success) {
         console.log(loadOpenGamesRes);
         setGames(loadOpenGamesRes.data);
