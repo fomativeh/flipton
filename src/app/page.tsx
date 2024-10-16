@@ -12,15 +12,18 @@ import GameLobby from "./page-components/GameLobby/GameLobby";
 import Leaderboard from "./components/Leaderboard/Leaderboard";
 import Profile from "./components/Profile/Profile";
 import History from "./components/History/History";
-import { Transaction, User } from "@/types/userType";
+import { GameHistory, Transaction, User } from "@/types/userType";
 import { fetchUserAccount } from "@/api/user";
 import { setName } from "@/helpers/setName";
 import { gameType } from "@/types/gameType";
 import { botSocketHandler } from "@/helpers/botSocketHandler";
 import Image from "next/image";
+import { fetchOpenGames } from "@/api/game";
+import { winnerType } from "@/types/winnerType";
 
 const Home = () => {
   let chatId = 6450051353;
+  // let chatId = 1645873626
   let token = "";
   const [games, setGames] = useState<gameType[]>([]);
   const [showGamesList, setShowGamesList] = useState<boolean>(true);
@@ -30,16 +33,28 @@ const Home = () => {
   const [showGameResult, setShowGameResult] = useState<boolean>(false);
   const [userData, setUserData] = useState<User>(null);
   const [showCreatedMessage, setShowCreatedMessage] = useState<boolean>(false);
-  const [player2HasJoined,setPlayer2HasJoined] = useState<boolean>(false)
+  const [player2HasJoined, setPlayer2HasJoined] = useState<boolean>(false);
+  const [tossComplete, setTossComplete] = useState<boolean>(false);
+  const [winner, setWinner] = useState<winnerType>(null);
+  const [myCurrentGame, setMyCurrentGame] = useState<any>(null);
+  const [tossing, setTossing] = useState<boolean>(false);
+
+  // useEffect(() => {
+  //   if (userData?.waitingForPlayer2) {
+
+  //   }
+  // }, [userData?.waitingForPlayer2]);
 
   useEffect(() => {
     if (userData?.waitingForPlayer2) {
-      setShowCreatedModal(true);
-      setTimeout(() => {
-        setShowCreatedMessage(true);
-      }, 2000);
+      setShowGamesList(false);
     }
-  }, [userData?.waitingForPlayer2]);
+
+    if (userData?.gameOngoing) {
+      setShowGamesList(false);
+      setShowGameplayModal(true);
+    }
+  }, [userData]);
 
   useEffect(() => {
     if (isCreatingGame) {
@@ -82,7 +97,6 @@ const Home = () => {
       const loadUserRes = await fetchUserAccount(chatId, "");
       if (loadUserRes?.data) {
         setUserData(loadUserRes.data);
-        console.log(loadUserRes.data);
       }
     } catch (error) {
       console.log(error);
@@ -100,7 +114,15 @@ const Home = () => {
     // Initialize the WebSocket connection
     const socket = io(process.env.NEXT_PUBLIC_BOT_SERVER_URL as string);
     botSocketRef.current = socket;
-    botSocketHandler(socket, gamesRef, chatId as number, setGames);
+    botSocketHandler(
+      socket,
+      gamesRef,
+      chatId as number,
+      setGames,
+      setUserData,
+      setWinner,
+      setTossing
+    );
 
     // Cleanup on unmount
     return () => {
@@ -154,7 +176,23 @@ const Home = () => {
     setIsCreatingGame(true);
   };
 
+  const loadOpenGames = async () => {
+    try {
+      const loadOpenGamesRes = await fetchOpenGames(token);
+      if (loadOpenGamesRes?.success) {
+        console.log(loadOpenGamesRes);
+        setGames(loadOpenGamesRes.data);
+      }
+    } catch (error) {}
+  };
+
+  useEffect(() => {
+    loadOpenGames();
+  }, []);
+
   const [currentPage, setCurrentPage] = useState<string>("Game Lobby");
+  const [createGameLoading, setCreateGameLoading] = useState<boolean>(false);
+  const [startGameLoading, setStartGameLoading] = useState<boolean>(false);
   return (
     <main className="w-full h-[100vh] flex flex-col justify-start items-center">
       <TonConnectButton className="hidden" />
@@ -199,6 +237,21 @@ const Home = () => {
 
       {currentPage == "Game Lobby" && (
         <GameLobby
+          setTossing={setTossing}
+          tossing={tossing}
+          startGameLoading={startGameLoading}
+          setStartGameLoading={setStartGameLoading}
+          createGameLoading={createGameLoading}
+          setCreateGameLoading={setCreateGameLoading}
+          myCurrentGame={myCurrentGame}
+          setMyCurrentGame={setMyCurrentGame}
+          loadUser={loadUser}
+          winner={winner}
+          setTossComplete={setTossComplete}
+          tossComplete={tossComplete}
+          games={games}
+          setShowCreatedMessage={setShowCreatedMessage}
+          showCreatedMessage={showCreatedMessage}
           setUserData={setUserData}
           userData={userData}
           walletErr={walletErr}
@@ -242,7 +295,18 @@ const Home = () => {
         />
       )}
 
-      {currentPage == "History" && <History />}
+      {currentPage == "History" && (
+        <History
+          showGamesList={showGamesList}
+          walletAddress={walletAddress}
+          tonConnectUI={tonConnectUI}
+          walletLoaded={walletLoaded}
+          handleWalletClick={handleWalletClick}
+          avatar={userData?.photo as string}
+          name={setName(userData)}
+          history={userData?.history as GameHistory[]}
+        />
+      )}
     </main>
   );
 };

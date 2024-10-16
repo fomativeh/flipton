@@ -1,5 +1,4 @@
 import callEndpoint from "@/utils/callEndpoint"
-import axios from "axios"
 const API_BASE_URL = process.env.NEXT_PUBLIC_BOT_SERVER_URL
 
 export const fetchUserAccount = async (chatId: number, token: string) => {
@@ -30,3 +29,4 @@ export const createNewGame = async (chatId: number, token: string, wagerAmount: 
         return { success: false }
     }
 }
+

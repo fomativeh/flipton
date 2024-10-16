@@ -13,11 +13,12 @@ export interface Transaction {
   date: string;
 }
 
-export interface History {
+export interface GameHistory {
   won: boolean;
-  player2: string;
-  amountWon: number;
+  opponent: string;
+  amount: number;
   date: string;
+  opponentPhoto:string
 }
 
 export type User = {
@@ -28,8 +29,17 @@ export type User = {
   balance?: number;
   friends?: Friend[];
   transactions?: Transaction[];
-  history?: History[];
+  history?: GameHistory[];
   _id?: String,
   waitingForPlayer2?: boolean,
-  photo?: String
+  waitingForPlayer1?:boolean,
+  player2Photo?:string,
+  player1Photo?:string,
+  player1Name?:string,
+  player2Name?:string,
+  photo?: string,
+  walletAddress?:string,
+  gameOngoing?:boolean,
+  player2HasJoined?: boolean
+  gameBalance?:number
 } | null

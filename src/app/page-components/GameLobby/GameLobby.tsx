@@ -1,11 +1,21 @@
 "use client";
-import { createNewGame } from "@/api/user";
+import {
+  beginGameSession,
+  registerTossEnd,
+  registerTossStart,
+} from "@/api/game";
+import { createNewGame, fetchUserAccount } from "@/api/user";
 import GameLobbyCard from "@/app/components/GameLobbyCard/GameLobbyCard";
 import TopHeader from "@/app/components/TopHeader/TopHeader";
+import { gameType } from "@/types/gameType";
 import { User } from "@/types/userType";
+import { winnerType } from "@/types/winnerType";
+import { toss } from "@/utils/toss";
 import { TonConnectUI } from "@tonconnect/ui-react";
+import { formatNumberWithCommas } from "fomautils";
 import Image from "next/image";
 import React, { Dispatch, SetStateAction, useEffect, useState } from "react";
+import "./GameLobby.css";
 
 type Props = {
   avatar: string;
@@ -30,9 +40,44 @@ type Props = {
   walletErr: string;
   userData: User;
   setUserData: Dispatch<SetStateAction<User>>;
+  showCreatedMessage: boolean;
+  setShowCreatedMessage: Dispatch<SetStateAction<boolean>>;
+  games: gameType[];
+  tossComplete: boolean;
+  setTossComplete: Dispatch<SetStateAction<boolean>>;
+  winner: winnerType;
+  loadUser: () => Promise<void>;
+  myCurrentGame: any;
+  setMyCurrentGame: Dispatch<SetStateAction<any>>;
+  createGameLoading: boolean;
+  setCreateGameLoading: Dispatch<SetStateAction<boolean>>;
+  startGameLoading: boolean;
+  setStartGameLoading: Dispatch<SetStateAction<boolean>>;
+  tossing: boolean;
+  setTossing: Dispatch<SetStateAction<boolean>>;
+};
+
+const LoaderRing = () => {
+  return (
+    <div className="lds-dual-ring">
+      <div></div>
+      <div></div>
+      <div></div>
+      <div></div>
+    </div>
+  );
 };
 
 const GameLobby = ({
+  tossing,
+  setTossing,
+  myCurrentGame,
+  createGameLoading,
+  setCreateGameLoading,
+  startGameLoading,
+  setStartGameLoading,
+  setMyCurrentGame,
+  winner,
   avatar,
   walletErr,
   name,
@@ -55,13 +100,25 @@ const GameLobby = ({
   walletAddress,
   userData,
   setUserData,
+  showCreatedMessage,
+  setShowCreatedMessage,
+  tossComplete,
+  setTossComplete,
+  loadUser,
+  games,
 }: Props) => {
   const [wagerAmount, setWagerAmount] = useState<string | null>(null);
   const [err, setErr] = useState<string>("");
-
+  const [spinning, setSpinning] = useState<boolean>(false);
   const [coinSideSelected, setCoinSideSelected] = useState<"Head" | "Tail">(
     "Head"
   );
+  const [replayLoading, setReplayLoading] = useState<boolean>(false);
+
+  let iHaveAGame = games.filter((eachGame) => eachGame.player1Id == chatId);
+  if (iHaveAGame.length > 0) {
+    setMyCurrentGame(iHaveAGame[0]);
+  }
 
   const handleCoinSideSelect = (side: "Head" | "Tail") => {
     // This function sets the selected coin side and resets the other.
@@ -70,14 +127,17 @@ const GameLobby = ({
 
   const createGame = async () => {
     if (!wagerAmount) {
-      setErr("Wager amount is required.");
+      setErr("Wager amount is required");
       return setTimeout(() => setErr(""), 2800);
     }
 
     if (parseInt(wagerAmount) < 0.5) {
-      setErr("Valid wager amount = 0.5 upwards.");
+      setErr("Valid wager amount = 0.5 upwards");
       return setTimeout(() => setErr(""), 2800);
     }
+
+    if (createGameLoading) return;
+    setCreateGameLoading(true);
 
     try {
       const createNewGameRes = await createNewGame(
@@ -87,11 +147,65 @@ const GameLobby = ({
         coinSideSelected
       );
       if (createNewGameRes?.success) {
+        setCreateGameLoading(false);
         setUserData({ ...userData, waitingForPlayer2: true });
+        setShowCreatedModal(true);
+        setShowCreatedMessage(true);
+        setTimeout(() => {
+          setShowCreatedMessage(false);
+        }, 1650);
+      } else {
+        setCreateGameLoading(false);
       }
     } catch (error) {
+      setCreateGameLoading(false);
       console.log(error);
     }
+  };
+
+  const beginSession = async () => {
+    if (startGameLoading) return;
+    setStartGameLoading(true);
+    try {
+      const beginSessionRes = await beginGameSession(chatId, "");
+      if (beginSessionRes?.success) {
+        setStartGameLoading(false);
+        setUserData({ ...userData, waitingForPlayer2: false });
+        setShowGameplayModal(true);
+      } else {
+        setStartGameLoading(false);
+      }
+    } catch (error) {
+      setStartGameLoading(false);
+    }
+  };
+
+  const handleToss = async () => {
+    if (winner) return; //If winner object was populated, the game has ended
+    if (spinning || tossing) return;
+    try {
+      const gameResult = toss();
+      setSpinning(true); //Start spin
+      await registerTossStart(chatId, "");
+      setTimeout(() => {}, 7000);
+      let tossResult: "Head" | "Tail" = gameResult == 1 ? "Head" : "Tail";
+      const registerTossEndRes = await registerTossEnd(chatId, tossResult, "");
+      if (registerTossEndRes?.success) {
+        setSpinning(false); //End spin
+        setTossing(false);
+      }
+    } catch (error) {}
+  };
+
+  const handlePlayAgain = async () => {
+    if (replayLoading) return;
+    try {
+      setReplayLoading(true);
+      await loadUser();
+      setReplayLoading(false);
+      setShowGameplayModal(false);
+      setShowGamesList(true);
+    } catch (error) {}
   };
 
   return (
@@ -112,6 +226,7 @@ const GameLobby = ({
         avatar={avatar}
         showGamesList={showGamesList}
       />
+
       {walletErr && (
         <p className="text-red-300 mt-[10px] text-center max-w-[85%]">
           {walletErr}
@@ -120,25 +235,30 @@ const GameLobby = ({
 
       {showGamesList && (
         <section className="w-full mt-[30px] flex flex-col justify-start items-start mb-[150px]">
-          <GameLobbyCard
-            setIsCreatingGame={setIsCreatingGame}
-            inProgress={true}
-          />
-          <GameLobbyCard setIsCreatingGame={setIsCreatingGame} />
-          <GameLobbyCard setIsCreatingGame={setIsCreatingGame} />
-          <GameLobbyCard setIsCreatingGame={setIsCreatingGame} />
-          <GameLobbyCard setIsCreatingGame={setIsCreatingGame} />
-          <GameLobbyCard setIsCreatingGame={setIsCreatingGame} />
-          <GameLobbyCard setIsCreatingGame={setIsCreatingGame} />
-          <GameLobbyCard setIsCreatingGame={setIsCreatingGame} />
-          <GameLobbyCard setIsCreatingGame={setIsCreatingGame} />
-          <GameLobbyCard setIsCreatingGame={setIsCreatingGame} />
-          <GameLobbyCard setIsCreatingGame={setIsCreatingGame} />
-          <GameLobbyCard setIsCreatingGame={setIsCreatingGame} />
-          <GameLobbyCard setIsCreatingGame={setIsCreatingGame} />
-          <GameLobbyCard setIsCreatingGame={setIsCreatingGame} />
-          <GameLobbyCard setIsCreatingGame={setIsCreatingGame} />
-          <GameLobbyCard setIsCreatingGame={setIsCreatingGame} />
+          {games.length == 0 && (
+            <section className="absolute w-full h-full top-0 left-0 flex flex-col justify-center items-center">
+              <p className="gamelobby-title font-[Poppins] mb-[20px] font-semibold text-[20px] text-center">
+                No open games yet
+              </p>
+
+              <span
+                onClick={() => setIsCreatingGame(true)}
+                className="w-[151px] h-[32px] flex justify-center items-center rounded-[4px] text-[#381E72] bg-[#D0BCFF] font-[Roboto] font-medium text-[14px]"
+              >
+                Create New Game
+              </span>
+            </section>
+          )}
+          {games.map((eachGame, i) => {
+            return (
+              <GameLobbyCard
+                chatId={chatId}
+                key={i}
+                setIsCreatingGame={setIsCreatingGame}
+                gameDetails={eachGame}
+              />
+            );
+          })}
         </section>
       )}
 
@@ -190,91 +310,193 @@ const GameLobby = ({
 
           <span
             onClick={createGame}
-            className="mt-[50px] w-[151px] h-[32px] flex justify-center items-center rounded-[4px] text-[#381E72] bg-[#D0BCFF] font-[Roboto] font-medium text-[14px]"
+            className={`${
+              createGameLoading && `opacity-[50%]`
+            } w-[151px] h-[32px] my-[40px] flex justify-center items-center rounded-[4px] text-[#381E72] bg-[#D0BCFF] font-[Roboto] font-medium text-[14px]`}
           >
-            Create New Game
+            <span className={`${createGameLoading && `mr-[8px]`}`}>
+              {createGameLoading ? `Creating game` : `Create Game`}
+            </span>
+            {createGameLoading && <div className="loader-2"></div>}
           </span>
         </section>
       )}
 
       {showCreatedModal && (
         <section className="absolute w-full h-full top-0 left-0 flex flex-col justify-center items-center">
-          <section className="flex justify-start items-center mb-[5px]">
-            <span className="font-[Poppins] text-[36px] font-medium text-white mr-[10px]">
-              {wagerAmount}
-            </span>
-            <figure className="w-[32px] h-[32px] relative">
-              <Image src={"/assets/icons/coin.png"} alt="Coin icon" fill />
+          {/* Show this immediately after game creation */}
+          {showCreatedMessage && (
+            <>
+              <section className="flex justify-start items-center mb-[5px]">
+                <span className="font-[Poppins] text-[36px] font-medium text-white mr-[10px]">
+                  {wagerAmount}
+                </span>
+                <figure className="w-[32px] h-[32px] relative">
+                  <Image src={"/assets/icons/coin.png"} alt="Coin icon" fill />
+                </figure>
+              </section>
+
+              <span className="gamelobby-title font-[Poppins] font-medium text-[20px] text-center mb-[20px]">
+                Game created successfully!
+              </span>
+
+              <LoaderRing />
+            </>
+          )}
+        </section>
+      )}
+
+      {/* Show this after game creation message disappears (userData?._id prevents reveal until account loads) */}
+      {!showCreatedMessage && userData?._id && userData.waitingForPlayer2 && (
+        <section className="absolute w-full h-full top-0 left-0 flex flex-col justify-center items-center">
+          <>
+            <figure className="w-[75px] h-[75px] relative rounded-[50px] border-[2px] border-[#FFC047]">
+              <Image
+                src={avatar ? avatar : `/assets/images/dp.svg`}
+                alt="User photo"
+                fill
+                className="rounded-[inherit]"
+              />
             </figure>
-          </section>
+            <span className="font-medium font-[Poppins] mt-[10px] text-white">
+              You
+            </span>
+            <p className="gamelobby-title font-[Poppins] font-semibold my-[20px] text-[20px] text-center">
+              {userData.player2HasJoined
+                ? `Player Found`
+                : `Waiting for player 2`}
+            </p>
 
-          <span className="gamelobby-title font-[Poppins] font-medium text-[20px] text-center">
-            Game created successfully!
-          </span>
-
-          <span
-            onClick={() => setShowGameplayModal(true)}
-            className="mt-[50px] w-[151px] h-[32px] flex justify-center items-center rounded-[4px] text-[#381E72] bg-[#D0BCFF] font-[Roboto] font-medium text-[14px]"
-          >
-            Play Now
-          </span>
+            {userData.player2HasJoined && (
+              <>
+                <figure className="w-[75px] h-[75px] relative rounded-[50px] border-[2px] border-[#D47332]">
+                  <Image
+                    src={
+                      userData.player2Photo
+                        ? userData.player2Photo
+                        : `/assets/images/dp.svg`
+                    }
+                    alt="User photo"
+                    fill
+                    className="rounded-[inherit]"
+                  />
+                </figure>
+                <span className="font-medium font-[Poppins] mt-[10px] text-white">
+                  {userData.player2Name}
+                </span>
+                {iHaveAGame ? (
+                  <span
+                    onClick={beginSession}
+                    className={`${
+                      startGameLoading && `opacity-[50%]`
+                    } mt-[50px] w-[151px] h-[32px] flex justify-center items-center rounded-[4px] text-[#381E72] bg-[#D0BCFF] font-[Roboto] font-medium text-[14px]`}
+                  >
+                    <span className={`${startGameLoading && `mr-[10px]`}`}>
+                      {startGameLoading ? `Starting Game` : `Start Game`}
+                    </span>
+                    {startGameLoading && <div className="loader-2"></div>}
+                  </span>
+                ) : (
+                  <p className="text-purple-500 mt-[15px]">
+                    Waiting for player 1 to start the game
+                  </p>
+                )}
+              </>
+            )}
+          </>
         </section>
       )}
 
       {showGameplayModal && (
         <section className="w-full h-full top-0 left-0 absolute flex flex-col justify-center items-center px-[20px]">
-          <figure className="w-[112px] h-[112px] relative">
+          <figure
+            className={`w-[112px] h-[112px] relative ${
+              spinning && `spin-coin`
+            } ${tossing && `spin-coin`}`}
+          >
             <Image src={"/assets/icons/coin.svg"} alt="Coin icon" fill />
           </figure>
 
-          <span
-            onClick={() => setShowGameResult(true)}
-            className={`mt-[30px] w-[108px] h-[32px] flex justify-center items-center rounded-[4px] text-[#381E72] bg-[#D0BCFF] font-[Roboto] font-medium text-[14px] ${
-              showGameResult ? `opacity-[50%]` : `opacity-[100%]`
-            }`}
-          >
-            Click To Toss
-          </span>
-
-          <section className="w-full flex justify-between items-start mt-[35px]">
-            <section className="flex flex-col justify-center items-start font-[Poppins] text-white">
-              <span>Vishisht Kapoor</span>
-              <section className="flex items-center justify-start">
-                <span className="font-medium">30</span>
-                <figure className="w-[16px] h-[16px] relative ml-[10px]">
-                  <Image src={"/assets/icons/coin.svg"} alt="Coin icon" fill />
-                </figure>
-              </section>
-              <span>Heads</span>
-            </section>
-
-            <span className="text-[10px] font-medium font-[Poppins] text-white">
-              vs
+          {myCurrentGame && !winner && (
+            <span
+              onClick={handleToss}
+              className={`mt-[30px] w-[108px] h-[32px] flex justify-center items-center rounded-[4px] text-[#381E72] bg-[#D0BCFF] font-[Roboto] font-medium text-[14px] ${
+                winner ? `opacity-[50%]` : `opacity-[100%]`
+              } ${(spinning || tossing) && `opacity-[50%]`} `}
+            >
+              {spinning || tossing ? "Tossing..." : "Click To Toss"}
             </span>
+          )}
 
-            <section className="flex flex-col justify-center items-start font-[Poppins] text-white">
-              <span>Prabhakar Rai</span>
-              <section className="flex items-center justify-start">
-                <span className="font-medium">30</span>
-                <figure className="w-[16px] h-[16px] relative ml-[10px]">
-                  <Image src={"/assets/icons/coin.svg"} alt="Coin icon" fill />
-                </figure>
+          {winner && (
+            <span
+              onClick={handleToss}
+              className="opacity-[50%] mt-[30px] w-[108px] h-[32px] flex justify-center items-center rounded-[4px] text-[#381E72] bg-[#D0BCFF] font-[Roboto] font-medium text-[14px]"
+            >
+              {winner?.winningSide}
+            </span>
+          )}
+
+          {myCurrentGame && (
+            <section className="w-full flex justify-between items-start mt-[35px]">
+              <section className="flex flex-col justify-center items-start font-[Poppins] text-white">
+                <span>{myCurrentGame.player1Name}</span>
+                <section className="flex items-center justify-start">
+                  <span className="font-medium">
+                    {formatNumberWithCommas(myCurrentGame.wagerAmount)}
+                  </span>
+                  <figure className="w-[16px] h-[16px] relative ml-[5px]">
+                    <Image
+                      src={"/assets/icons/coin.svg"}
+                      alt="Coin icon"
+                      fill
+                    />
+                  </figure>
+                </section>
+                <span>{myCurrentGame.creatorChosenSide}</span>
               </section>
-              <span>Tails</span>
-            </section>
-          </section>
 
-          {showGameResult && (
+              <span className="text-[10px] font-medium font-[Poppins] text-white">
+                vs
+              </span>
+
+              <section className="flex flex-col justify-center items-start font-[Poppins] text-white">
+                <span>{myCurrentGame.player2Name}</span>
+                <section className="flex items-center justify-start">
+                  <span className="font-medium">
+                    {myCurrentGame.wagerAmount}
+                  </span>
+                  <figure className="w-[16px] h-[16px] relative ml-[5px]">
+                    <Image
+                      src={"/assets/icons/coin.svg"}
+                      alt="Coin icon"
+                      fill
+                    />
+                  </figure>
+                </section>
+                <span>
+                  {myCurrentGame.creatorChosenSide == "Head" ? `Tail` : `Head`}
+                </span>
+              </section>
+            </section>
+          )}
+
+          {winner && (
             <>
               <span className="gamelobby-title font-[Poppins] mt-[25px] text-center">
-                Congratulations Vishisht, you won!
+                {winner.winnerId == chatId
+                  ? `Congratulations ${winner.winnerName}, you won!`
+                  : `Hard luck ${winner.loserName}, you lost!`}
               </span>
 
               <span
-                onClick={() => setShowGamesList(true)}
-                className="mt-[30px] w-[108px] h-[32px] flex justify-center items-center rounded-[4px] text-[#381E72] bg-[#D0BCFF] font-[Roboto] font-medium text-[14px]"
+                onClick={handlePlayAgain}
+                className={`${
+                  replayLoading && `opacity-[50%]`
+                } mt-[30px] w-[108px] h-[32px] flex justify-center items-center rounded-[4px] text-[#381E72] bg-[#D0BCFF] font-[Roboto] font-medium text-[14px]`}
               >
-                Play Again
+                <span className={`${replayLoading && `mr-[10px]`}`}>Play Again</span>
+                {replayLoading && <div className="loader-2"></div>}
               </span>
             </>
           )}
