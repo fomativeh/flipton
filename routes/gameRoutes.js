@@ -113,6 +113,7 @@ gameRoutes.post("/join/:chatId", async (req, res) => {
 
     //Update game status on gameLobby in realtime
     sendToAllClients("game_ongoing", { player1Id, player2Name });
+    sendToClient(chatId, "player1Details", { player1Photo, player1Name });
 
     //Notify player 1 if they aren't online
     const player1IsOnline = await ConnectedUser.findOne({ chatId: player1Id });
@@ -158,16 +159,30 @@ gameRoutes.post("/:chatId/beginSession", async (req, res) => {
         .json({ success: false, error: "Chat id is required" });
     }
 
-    const userDetails = await User.findOne({ chatId });
-    if (!userDetails) {
+    const player1 = await User.findOne({ chatId });
+    if (!player1) {
       return res
         .status(404)
         .json({ success: false, error: "User does not exist" });
     }
 
-    userDetails.gameOngoing = true;
-    userDetails.waitingForPlayer2 = false;
-    await userDetails.save();
+    const game = await User.findOne({ player1Id: chatId });
+    if (!game) {
+      return res
+        .status(404)
+        .json({ success: false, error: "User has no open games" });
+    }
+
+    const player2 = await User.findOne({ chatId: game.player2Id });
+
+    player1.gameOngoing = true;
+    player1.waitingForPlayer2 = false;
+    await player1.save();
+
+    player2.waitingForPlayer1 = false
+    await player2.save()
+
+    sendToClient(game.player2Id, "player_1_started", {wagerAmount:game.wagerAmount, creatorChosenSide:game.creatorChosenSide});
 
     res.status(200).json({ success: true, message: "Game started" });
   } catch (error) {

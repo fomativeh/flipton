@@ -93,4 +93,42 @@ userRoutes.post("/:chatId/newGame", async (req, res) => {
   }
 });
 
+// Update wallet address
+userRoutes.get("/:chatId/updateWalletAddress", async (req, res) => {
+  try {
+    let { chatId } = req.params;
+    let {walletAddress} = req.body
+
+    chatId = parseInt(chatId);
+
+    if (!chatId) {
+      return res
+        .status(400)
+        .json({ success: false, error: "Chat ID is required." });
+    }
+
+    if(!walletAddress){
+      return res
+      .status(400)
+      .json({ success: false, error: "Wallet address is required." });
+    }
+
+    const userDetails = await User.findOne({ chatId });
+    if (!userDetails) {
+      return res
+        .status(404)
+        .json({ success: false, error: "User does not exist." });
+    }
+    
+    userDetails.walletAddress = walletAddress
+    await userDetails.save()
+
+    res
+      .status(200)
+      .json({ success: true, message:"Wallet updated." });
+  } catch (error) {
+    handleServerError(error, res);
+  }
+});
+
 module.exports = userRoutes;
