@@ -657,8 +657,8 @@ const GameLobby = ({
               <span
                 onClick={handlePlayAgain}
                 className={`${
-                  replayLoading && `opacity-[50%] px-[4px]`
-                } mt-[30px] w-[108px] h-[32px] flex justify-center items-center rounded-[4px] text-[#381E72] bg-[#D0BCFF] font-[Roboto] font-medium text-[14px]`}
+                  replayLoading? `opacity-[50%] w-[112px]`:`w-[108px] opacity-[100%]`
+                } mt-[30px]  h-[32px] flex justify-center items-center rounded-[4px] text-[#381E72] bg-[#D0BCFF] font-[Roboto] font-medium text-[14px]`}
               >
                 <span className={`${replayLoading && `mr-[10px]`}`}>
                   Play Again

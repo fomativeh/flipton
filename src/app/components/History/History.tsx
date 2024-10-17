@@ -78,7 +78,7 @@ const History = (props: PageProps) => {
                 </section>
 
                 <section className="w-full flex justify-start items-center mb-[10px]">
-                  <figure className="mr-[15px] relative w-[20px] h-[20px]">
+                  <figure className="mr-[15px] relative w-[20px] h-[20px] rounded-[50px]">
                     <Image
                       src={
                         eachHistory.opponentPhoto
@@ -87,6 +87,7 @@ const History = (props: PageProps) => {
                       }
                       alt="User Photo"
                       fill
+                      className="rounded-[inherit]"
                     />
                   </figure>
                   <span>{eachHistory.opponent}</span>
