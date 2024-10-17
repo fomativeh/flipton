@@ -87,10 +87,12 @@ const Home = () => {
     }
 
     //If user joined a game as player 2
-    if (userData?.player1Name) {
+    if (userData?.player2Name) {
       setShowGamesList(false);
       setShowPlayer2JoinScreen(true);
     }
+
+    
   }, [userData]);
 
   useEffect(() => {

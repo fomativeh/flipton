@@ -23,6 +23,11 @@ const GameLobbyCard = ({ setIsCreatingGame, gameDetails, chatId, tonConnectUI, s
   const handleJoin = async () => {
     if (inProgress) return;
     if (joining) return;
+
+    if (!tonConnectUI.connected) {
+      setWalletErr("Please connect your wallet to join/start a game.");
+      return setTimeout(() => setWalletErr(""), 2800);
+    }
     setJoining(true);
     try {
 
