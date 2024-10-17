@@ -1,5 +1,7 @@
 import { Transaction } from "@/types/userType";
-import { createPostEvent, postEvent } from "@tma.js/sdk";
+import {
+  postEvent,
+} from "@tma.js/sdk-react";
 import { TonConnectUI } from "@tonconnect/ui-react";
 import { formatNumberWithCommas } from "fomautils";
 import Image from "next/image";
@@ -84,8 +86,6 @@ const Profile = ({
       setTransactionsToRender(trimmedTransactions);
     }
   }, [expand]);
-
-  const postEvent = createPostEvent("6.5")
 
   return (
     <section className="page-bg w-full min-h-screen px-[20px] h-[100vh] flex flex-col justify-start items-center overflow-y-auto relative pb-[150px] ">

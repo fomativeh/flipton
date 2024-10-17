@@ -156,10 +156,12 @@ const GameLobby = ({
     setCreateGameLoading(true);
     const tonweb = new TonWeb();
 
+    // let formattedAmount = parseFloat(wagerAmount).?
+
     try {
       // Convert the TON amount to nanoTONs
       const amountInNanoTons = Math.floor(
-        parseFloat("0.5") * 1e9
+        0.5 * 1e9
       ).toString();
       // // Prepare the transaction payload
       const transactionPayload = {
