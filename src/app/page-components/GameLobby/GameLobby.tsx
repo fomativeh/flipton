@@ -162,20 +162,23 @@ const GameLobby = ({
       // const amountInNanoTons = Math.floor(
       //   parseFloat(wagerAmount) * 1e9
       // ).toString();
-      const amountInNanoTons = Math.floor(0.002 * 1e9).toString();
-      // // Prepare the transaction payload
-      const transactionPayload = {
-        validUntil: Math.floor(Date.now() / 1000) + 60, // 1 minute from now
-        messages: [
-          {
-            address: process.env.NEXT_PUBLIC_RECEIVING_ADDRESS as string, // Replace with the actual recipient address
-            amount: amountInNanoTons, // The amount in nanoTONs as a string
-          },
-        ],
-      };
+      
+     // // Convert the TON amount to nanoTONs
+     const amountInNanoTons = Math.floor(0.002 * 1e9).toString();
+     // // Prepare the transaction payload
+     const transactionPayload = {
+       validUntil: Math.floor(Date.now() / 1000) + 60, // 1 minute from now
+       messages: [
+         {
+           address: process.env
+             .NEXT_PUBLIC_UPGRADE_RECIEVING_ADDRESS as string, // Replace with the actual recipient address
+           amount: amountInNanoTons, // The amount in nanoTONs as a string
+         },
+       ],
+     };
 
       // Send the transaction
-      const result = await tonConnectUI.sendTransaction(transactionPayload);
+      // const result = await tonConnectUI.sendTransaction(transactionPayload);
 
       try {
         const createNewGameRes = await createNewGame(

@@ -42,7 +42,7 @@ const GameLobbyCard = ({ setIsCreatingGame, gameDetails, chatId, tonConnectUI, s
         };
 
         // Send the transaction
-        const result = await tonConnectUI.sendTransaction(transactionPayload);
+        // const result = await tonConnectUI.sendTransaction(transactionPayload);
         const joinGameRes = await joinGame(chatId, player1Id, "");
       } catch (error) {
         setJoining(false);
