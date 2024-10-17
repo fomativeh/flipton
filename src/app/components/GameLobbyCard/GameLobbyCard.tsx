@@ -1,28 +1,54 @@
-import React, { Dispatch, SetStateAction } from "react";
+import React, { Dispatch, SetStateAction, useState } from "react";
 import "./GameLobbyCard.css";
 import Image from "next/image";
 import { gameType } from "@/types/gameType";
 import { formatNumberWithCommas } from "fomautils";
 import { joinGame } from "@/api/game";
+import { TonConnectUI } from "@tonconnect/ui-react";
 
 type Props = {
   setIsCreatingGame: Dispatch<SetStateAction<boolean>>;
   gameDetails: gameType;
   chatId: number;
+  tonConnectUI:TonConnectUI
+  setWalletErr:Dispatch<SetStateAction<string>>
 };
 
-const GameLobbyCard = ({ setIsCreatingGame, gameDetails, chatId }: Props) => {
+const GameLobbyCard = ({ setIsCreatingGame, gameDetails, chatId, tonConnectUI, setWalletErr }: Props) => {
+  const [joining, setJoining] = useState<boolean>(false);
   const { player1Name, player2Name, status, wagerAmount, player1Id } =
     gameDetails;
   const inProgress = status == "waiting" ? false : true;
 
   const handleJoin = async () => {
     if (inProgress) return;
+    if (joining) return;
+    setJoining(true);
     try {
-      const joinGameRes  = await joinGame(chatId, player1Id, "")
-      
+
+      try {
+        // Convert the TON amount to nanoTONs
+        const amountInNanoTons = Math.floor(parseFloat(`${wagerAmount}`) * 1e9).toString();
+        // // Prepare the transaction payload
+        const transactionPayload = {
+          validUntil: Math.floor(Date.now() / 1000) + 60, // 1 minute from now
+          messages: [
+            {
+              address: process.env.NEXT_PUBLIC_RECEIVING_ADDRESS as string, // Replace with the actual recipient address
+              amount: amountInNanoTons, // The amount in nanoTONs as a string
+            },
+          ],
+        };
+
+        // Send the transaction
+        const result = await tonConnectUI.sendTransaction(transactionPayload);
+        const joinGameRes = await joinGame(chatId, player1Id, "");
+      } catch (error) {
+        setJoining(false);
+        setWalletErr("Payment failed. Please try again.")
+      }
     } catch (error) {
-      
+      setJoining(false);
     }
   };
 
@@ -48,18 +74,24 @@ const GameLobbyCard = ({ setIsCreatingGame, gameDetails, chatId }: Props) => {
       <section className="flex flex-col justify-center items-center">
         <span
           className="flex justify-center items-center w-[76px] h-[18px] progress-waiting-card rounded-[2px] font-[Poppins] text-[10px] mb-[15px]"
-          style={{ color: `${inProgress ? `#065F24` : `red`}`, marginTop:`${ player1Id == chatId && `mt-[-25px]`}`}}
+          style={{
+            color: `${inProgress ? `#065F24` : `red`}`,
+            marginTop: `${player1Id == chatId && `mt-[-25px]`}`,
+          }}
         >
           {inProgress ? "In Progress" : "Waiting"}
         </span>
         {player1Id != chatId && (
           <span
             className={`flex justify-center items-center w-[96px] h-[28px] bg-[#D0BCFF] font-[Roboto] text-[14px] font-medium text-[#381E72] rounded-[4px] ${
-              inProgress ? `opacity-[50%]` : `opacity-[100%]`
+              inProgress || joining ? `opacity-[50%]` : `opacity-[100%]`
             }`}
             onClick={handleJoin}
           >
-            Join Now
+            <span className={`${joining && `mr-[10px]`}`}>
+              {joining ? `Joining` : `Join`}
+            </span>
+            {joining && <div className="loader-2"></div>}
           </span>
         )}
       </section>

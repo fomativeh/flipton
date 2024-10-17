@@ -110,7 +110,7 @@ const GameLobby = ({
   player1Details,
   games,
 }: Props) => {
-  const [wagerAmount, setWagerAmount] = useState<string>('');
+  const [wagerAmount, setWagerAmount] = useState<string>("");
   const [err, setErr] = useState<string>("");
   const [spinning, setSpinning] = useState<boolean>(false);
   const [coinSideSelected, setCoinSideSelected] = useState<"Head" | "Tail">(
@@ -145,7 +145,6 @@ const GameLobby = ({
       return setTimeout(() => setErr(""), 2800);
     }
 
-
     if (createGameLoading) return;
 
     if (!tonConnectUI.connected) {
@@ -161,7 +160,7 @@ const GameLobby = ({
     try {
       // Convert the TON amount to nanoTONs
       const amountInNanoTons = Math.floor(
-        0.5 * 1e9
+        parseFloat(wagerAmount) * 1e9
       ).toString();
       // // Prepare the transaction payload
       const transactionPayload = {
@@ -308,6 +307,8 @@ const GameLobby = ({
           {games.map((eachGame, i) => {
             return (
               <GameLobbyCard
+                tonConnectUI={tonConnectUI}
+                setWalletErr={setWalletErr}
                 chatId={chatId}
                 key={i}
                 setIsCreatingGame={setIsCreatingGame}
