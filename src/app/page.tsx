@@ -322,6 +322,7 @@ const Home = () => {
         <>
           {currentPage == "Game Lobby" && (
             <GameLobby
+              setDataForPlayer2={setDataForPlayer2}
               setWalletErr={setWalletErr}
               dataForPlayer2={dataForPlayer2}
               showPlayer2JoinScreen={showPlayer2JoinScreen}
@@ -336,6 +337,7 @@ const Home = () => {
               setMyCurrentGame={setMyCurrentGame}
               loadUser={loadUser}
               winner={winner}
+              setWinner={setWinner}
               setTossComplete={setTossComplete}
               tossComplete={tossComplete}
               games={games}

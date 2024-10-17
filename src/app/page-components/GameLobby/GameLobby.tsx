@@ -65,9 +65,16 @@ type Props = {
     creatorChosenSide: "Head" | "Tail";
   } | null;
   setWalletErr: Dispatch<SetStateAction<string>>;
+  setWinner:Dispatch<SetStateAction<winnerType | null>>
+  setDataForPlayer2:Dispatch<SetStateAction<{
+    wagerAmount: number;
+    creatorChosenSide: "Head" | "Tail";
+  } | null>>
 };
 
 const GameLobby = ({
+  setDataForPlayer2,
+  setWinner,
   setWalletErr,
   dataForPlayer2,
   showPlayer2JoinScreen,
@@ -259,12 +266,17 @@ const GameLobby = ({
     if (replayLoading) return;
     try {
       setReplayLoading(true);
+      setWinner(null)
+      setSpinning(false)
+      setTossing(false)
+      setDataForPlayer2(null)
       await loadUser();
       setReplayLoading(false);
       setShowGameplayModal(false);
       setShowGamesList(true);
     } catch (error) {}
   };
+
 
   return (
     <section

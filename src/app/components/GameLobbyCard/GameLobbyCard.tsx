@@ -50,7 +50,6 @@ const GameLobbyCard = ({ setIsCreatingGame, gameDetails, chatId, tonConnectUI, s
         // Send the transaction
         // const result = await tonConnectUI.sendTransaction(transactionPayload);
         const joinGameRes = await joinGame(chatId, player1Id, "");
-        setJoining(false);
       } catch (error) {
         setJoining(false);
         setWalletErr("Payment failed. Please try again.")
