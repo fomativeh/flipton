@@ -131,7 +131,7 @@ const GameLobby = ({
     ? userData.player1Photo
     : player1Details?.photo;
 
-  let iHaveAGame = games.filter((eachGame) => eachGame.player1Id == chatId);
+  let iHaveAGame = games.filter((eachGame) => eachGame?.player1Id == chatId);
   if (iHaveAGame.length > 0) {
     setMyCurrentGame(iHaveAGame[0]);
   }
@@ -206,6 +206,7 @@ const GameLobby = ({
           setUserData({ ...userData, waitingForPlayer2: true });
           setShowCreatedModal(true);
           setShowCreatedMessage(true);
+          setWagerAmount("")
           setTimeout(() => {
             setShowCreatedMessage(false);
           }, 1650);
@@ -270,10 +271,11 @@ const GameLobby = ({
       setSpinning(false)
       setTossing(false)
       setDataForPlayer2(null)
-      await loadUser();
       setReplayLoading(false);
       setShowGameplayModal(false);
       setShowGamesList(true);
+      setMyCurrentGame(null)
+      await loadUser();
     } catch (error) {}
   };
 
