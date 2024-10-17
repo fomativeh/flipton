@@ -76,6 +76,12 @@ const Home = () => {
   //   }
   // }, [player1Details]);
 
+  useEffect(()=>{
+    if(dataForPlayer2){
+      setShowGameplayModal(true)
+    }
+  },[dataForPlayer2])
+
   useEffect(() => {
     if (userData?.waitingForPlayer2) {
       setShowGamesList(false);

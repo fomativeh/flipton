@@ -409,7 +409,7 @@ const GameLobby = ({
 
       {/* Show this after game creation message disappears (userData?._id prevents reveal until account loads) */}
       {/* For game creator */}
-      {!showCreatedMessage && userData?._id && userData.waitingForPlayer2 && (
+      {!showCreatedMessage && userData?._id && userData.waitingForPlayer2 && !showGameplayModal && (
         <section className="absolute w-full h-full top-0 left-0 flex flex-col justify-center items-center">
           <>
             <figure className="w-[75px] h-[75px] relative rounded-[50px] border-[2px] border-[#FFC047]">
@@ -464,7 +464,7 @@ const GameLobby = ({
       )}
 
       {/* For player 2 (Join game) */}
-      {!showCreatedMessage && userData?._id && userData.player1Name && (
+      {!showCreatedMessage && userData?._id && userData.player1Name && !showGameplayModal && (
         <section className="absolute w-full h-full top-0 left-0 flex flex-col justify-center items-center">
           <>
             <figure className="w-[75px] h-[75px] relative rounded-[50px] border-[2px] border-[#D47332]">
