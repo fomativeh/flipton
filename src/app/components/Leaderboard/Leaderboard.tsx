@@ -153,7 +153,7 @@ const Leaderboard = ({
           </section>
         </section>
 
-        {leaderboard.length > 1 && (
+        {leaderboard.length > 2 && (
           <section className="flex flex-col justify-center items-center">
             <figure className="relative w-[60px] h-[60px] mb-[10px] rounded-[50px]">
               <Image

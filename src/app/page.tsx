@@ -36,8 +36,8 @@ const Home = () => {
   // const { initDataRaw } = retrieveLaunchParams();
   // let token = initDataRaw as string
 
-  // let chatId = 6450051353;
-  let chatId = 1645873626;
+  let chatId = 6450051353;
+  // let chatId = 1645873626;
   let token = "";
   const [games, setGames] = useState<gameType[]>([]);
   const [showGamesList, setShowGamesList] = useState<boolean>(true);

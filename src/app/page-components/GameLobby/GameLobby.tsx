@@ -129,6 +129,13 @@ const GameLobby = ({
     setMyCurrentGame(iHaveAGame[0]);
   }
 
+  useEffect(() => {
+    if (winner) {
+      setTossing(false);
+      setSpinning(false);
+    }
+  }, [winner]);
+
   const handleCoinSideSelect = (side: "Head" | "Tail") => {
     // This function sets the selected coin side and resets the other.
     setCoinSideSelected(side);
@@ -162,20 +169,20 @@ const GameLobby = ({
       // const amountInNanoTons = Math.floor(
       //   parseFloat(wagerAmount) * 1e9
       // ).toString();
-      
-     // // Convert the TON amount to nanoTONs
-     const amountInNanoTons = Math.floor(0.002 * 1e9).toString();
-     // // Prepare the transaction payload
-     const transactionPayload = {
-       validUntil: Math.floor(Date.now() / 1000) + 60, // 1 minute from now
-       messages: [
-         {
-           address: process.env
-             .NEXT_PUBLIC_UPGRADE_RECIEVING_ADDRESS as string, // Replace with the actual recipient address
-           amount: amountInNanoTons, // The amount in nanoTONs as a string
-         },
-       ],
-     };
+
+      // // Convert the TON amount to nanoTONs
+      const amountInNanoTons = Math.floor(0.002 * 1e9).toString();
+      // // Prepare the transaction payload
+      const transactionPayload = {
+        validUntil: Math.floor(Date.now() / 1000) + 60, // 1 minute from now
+        messages: [
+          {
+            address: process.env
+              .NEXT_PUBLIC_UPGRADE_RECIEVING_ADDRESS as string, // Replace with the actual recipient address
+            amount: amountInNanoTons, // The amount in nanoTONs as a string
+          },
+        ],
+      };
 
       // Send the transaction
       // const result = await tonConnectUI.sendTransaction(transactionPayload);
@@ -217,7 +224,11 @@ const GameLobby = ({
       const beginSessionRes = await beginGameSession(chatId, "");
       if (beginSessionRes?.success) {
         setStartGameLoading(false);
-        setUserData({ ...userData, waitingForPlayer2: false, gameOngoing:true });
+        setUserData({
+          ...userData,
+          waitingForPlayer2: false,
+          gameOngoing: true,
+        });
         setShowGameplayModal(true);
       } else {
         setStartGameLoading(false);
@@ -409,100 +420,108 @@ const GameLobby = ({
 
       {/* Show this after game creation message disappears (userData?._id prevents reveal until account loads) */}
       {/* For game creator */}
-      {!showCreatedMessage && userData?._id && userData.waitingForPlayer2 && !showGameplayModal && (
-        <section className="absolute w-full h-full top-0 left-0 flex flex-col justify-center items-center">
-          <>
-            <figure className="w-[75px] h-[75px] relative rounded-[50px] border-[2px] border-[#FFC047]">
-              <Image
-                src={avatar ? avatar : `/assets/images/dp.svg`}
-                alt="User photo"
-                fill
-                className="rounded-[inherit]"
-              />
-            </figure>
-            <span className="font-medium font-[Poppins] mt-[10px] text-white">
-              You
-            </span>
-            <p className="gamelobby-title font-[Poppins] font-semibold my-[20px] text-[20px] text-center">
-              {userData.player2HasJoined
-                ? `Player Found`
-                : `Waiting for player 2`}
-            </p>
+      {!showCreatedMessage &&
+        userData?._id &&
+        userData.waitingForPlayer2 &&
+        !showGameplayModal && (
+          <section className="absolute w-full h-full top-0 left-0 flex flex-col justify-center items-center">
+            <>
+              <figure className="w-[75px] h-[75px] relative rounded-[50px] border-[2px] border-[#FFC047]">
+                <Image
+                  src={avatar ? avatar : `/assets/images/dp.svg`}
+                  alt="User photo"
+                  fill
+                  className="rounded-[inherit]"
+                />
+              </figure>
+              <span className="font-medium font-[Poppins] mt-[10px] text-white">
+                You
+              </span>
+              <p className="gamelobby-title font-[Poppins] font-semibold my-[20px] text-[20px] text-center">
+                {userData.player2HasJoined
+                  ? `Player Found`
+                  : `Waiting for player 2`}
+              </p>
 
-            {userData.player2HasJoined && (
-              <>
-                <figure className="w-[75px] h-[75px] relative rounded-[50px] border-[2px] border-[#D47332]">
-                  <Image
-                    src={
-                      userData.player2Photo
-                        ? userData.player2Photo
-                        : `/assets/images/dp.svg`
-                    }
-                    alt="User photo"
-                    fill
-                    className="rounded-[inherit]"
-                  />
-                </figure>
-                <span className="font-medium font-[Poppins] mt-[10px] text-white">
-                  {userData.player2Name}
-                </span>
-                <span
-                  onClick={beginSession}
-                  className={`${
-                    startGameLoading && `opacity-[50%]`
-                  } mt-[50px] w-[151px] h-[32px] flex justify-center items-center rounded-[4px] text-[#381E72] bg-[#D0BCFF] font-[Roboto] font-medium text-[14px]`}
-                >
-                  <span className={`${startGameLoading && `mr-[10px]`}`}>
-                    {startGameLoading ? `Starting Game` : `Start Game`}
+              {userData.player2HasJoined && (
+                <>
+                  <figure className="w-[75px] h-[75px] relative rounded-[50px] border-[2px] border-[#D47332]">
+                    <Image
+                      src={
+                        userData.player2Photo
+                          ? userData.player2Photo
+                          : `/assets/images/dp.svg`
+                      }
+                      alt="User photo"
+                      fill
+                      className="rounded-[inherit]"
+                    />
+                  </figure>
+                  <span className="font-medium font-[Poppins] mt-[10px] text-white">
+                    {userData.player2Name}
                   </span>
-                  {startGameLoading && <div className="loader-2"></div>}
-                </span>
-              </>
-            )}
-          </>
-        </section>
-      )}
+                  <span
+                    onClick={beginSession}
+                    className={`${
+                      startGameLoading && `opacity-[50%]`
+                    } mt-[50px] w-[151px] h-[32px] flex justify-center items-center rounded-[4px] text-[#381E72] bg-[#D0BCFF] font-[Roboto] font-medium text-[14px]`}
+                  >
+                    <span className={`${startGameLoading && `mr-[10px]`}`}>
+                      {startGameLoading ? `Starting Game` : `Start Game`}
+                    </span>
+                    {startGameLoading && <div className="loader-2"></div>}
+                  </span>
+                </>
+              )}
+            </>
+          </section>
+        )}
 
       {/* For player 2 (Join game) */}
-      {!showCreatedMessage && userData?._id && userData.player1Name && !showGameplayModal && (
-        <section className="absolute w-full h-full top-0 left-0 flex flex-col justify-center items-center">
-          <>
-            <figure className="w-[75px] h-[75px] relative rounded-[50px] border-[2px] border-[#D47332]">
-              <Image
-                src={
-                  userData.player1Photo
-                    ? userData.player1Photo
-                    : `/assets/images/dp.svg`
-                }
-                alt="User photo"
-                fill
-                className="rounded-[inherit]"
-              />
-            </figure>
-            <span className="font-medium font-[Poppins] mt-[10px] text-white">
-              {userData.player1Name}
-            </span>
-            <span className="text-[10px] my-[30px] font-medium font-[Poppins] text-white">
-              vs
-            </span>
-            <figure className="w-[75px] h-[75px] relative rounded-[50px] border-[2px] border-[#FFC047]">
-              <Image
-                src={userData?.photo ? userData.photo : `/assets/images/dp.svg`}
-                alt="User photo"
-                fill
-                className="rounded-[inherit]"
-              />
-            </figure>
-            <span className="font-medium font-[Poppins] mt-[10px] text-white">
-              {setName(userData)}
-            </span>
+      {!showCreatedMessage &&
+        userData?._id &&
+        userData.player1Name &&
+        !showGameplayModal && (
+          <section className="absolute w-full h-full top-0 left-0 flex flex-col justify-center items-center">
+            <>
+              <figure className="w-[75px] h-[75px] relative rounded-[50px] border-[2px] border-[#D47332]">
+                <Image
+                  src={
+                    userData.player1Photo
+                      ? userData.player1Photo
+                      : `/assets/images/dp.svg`
+                  }
+                  alt="User photo"
+                  fill
+                  className="rounded-[inherit]"
+                />
+              </figure>
+              <span className="font-medium font-[Poppins] mt-[10px] text-white">
+                {userData.player1Name}
+              </span>
+              <span className="text-[10px] my-[30px] font-medium font-[Poppins] text-white">
+                vs
+              </span>
+              <figure className="w-[75px] h-[75px] relative rounded-[50px] border-[2px] border-[#FFC047]">
+                <Image
+                  src={
+                    userData?.photo ? userData.photo : `/assets/images/dp.svg`
+                  }
+                  alt="User photo"
+                  fill
+                  className="rounded-[inherit]"
+                />
+              </figure>
+              <span className="font-medium font-[Poppins] mt-[10px] text-white">
+                {setName(userData)}
+              </span>
 
-            <span className="gamelobby-title font-[Poppins] mt-[25px] text-center">
-              Waiting for player 1 to start the game
-            </span>
-          </>
-        </section>
-      )}
+              <span className="gamelobby-title font-[Poppins] mt-[25px] text-center">
+                Waiting for player 1 to start the game
+              </span>
+            </>
+          </section>
+        )}
 
       {showGameplayModal && (
         <section className="w-full h-full top-0 left-0 absolute flex flex-col justify-center items-center px-[20px]">
@@ -638,7 +657,7 @@ const GameLobby = ({
               <span
                 onClick={handlePlayAgain}
                 className={`${
-                  replayLoading && `opacity-[50%]`
+                  replayLoading && `opacity-[50%] px-[4px]`
                 } mt-[30px] w-[108px] h-[32px] flex justify-center items-center rounded-[4px] text-[#381E72] bg-[#D0BCFF] font-[Roboto] font-medium text-[14px]`}
               >
                 <span className={`${replayLoading && `mr-[10px]`}`}>
