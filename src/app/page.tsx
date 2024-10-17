@@ -87,11 +87,9 @@ const Home = () => {
     }
 
     //If user joined a game as player 2
-    if (userData?.player2Name) {
+    if (userData?.player2Name || userData?.player1Name) {
       setShowGamesList(false);
-      setShowPlayer2JoinScreen(true);
     }
-
     
   }, [userData]);
 
@@ -161,7 +159,6 @@ const Home = () => {
       setUserData,
       setWinner,
       setTossing,
-      setPlayer1Details,
       setDataForPlayer2
     );
 

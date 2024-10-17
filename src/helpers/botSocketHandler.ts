@@ -27,9 +27,9 @@ type player1StartedEvent = {
     creatorChosenSide:"Head" | "Tail"
 } | null
 
-type player1DetailsType = {photo: string, name: string }
+type player1DetailsType = {player1Photo: string, player1Name: string }
 
-export const botSocketHandler = (botSocket: any, gamesRef: MutableRefObject<gameType[] | null>, chatId: number, setGames: Dispatch<SetStateAction<gameType[]>>, setUserData: Dispatch<SetStateAction<User>>, setWinner: Dispatch<SetStateAction<winnerType>>, setTossing: Dispatch<SetStateAction<boolean>>, setPlayer1Details: Dispatch<SetStateAction<player1DetailsType | null>>, setDataForPlayer2:Dispatch<SetStateAction<player1StartedEvent>>) => {
+export const botSocketHandler = (botSocket: any, gamesRef: MutableRefObject<gameType[] | null>, chatId: number, setGames: Dispatch<SetStateAction<gameType[]>>, setUserData: Dispatch<SetStateAction<User>>, setWinner: Dispatch<SetStateAction<winnerType>>, setTossing: Dispatch<SetStateAction<boolean>>, setDataForPlayer2:Dispatch<SetStateAction<player1StartedEvent>>) => {
     // Listen for connection to tasks socket server
     botSocket.on("connect", () => {
         console.log("conncted to bot socket server");
@@ -43,7 +43,7 @@ export const botSocketHandler = (botSocket: any, gamesRef: MutableRefObject<game
         //Update user data when player 2 joins
         botSocket.on("player_2_joined", (data: player2JoinEventType) => {
             setUserData((prevData) => ({
-                ...prevData, ...data
+                ...prevData, ...data, player2HasJoined:true
             }));
         });
 
@@ -80,7 +80,7 @@ export const botSocketHandler = (botSocket: any, gamesRef: MutableRefObject<game
         //Player 1 info (for joining player)
         botSocket.on("player1Details", (data: player1DetailsType) => {
             setUserData((prevData) => ({
-                ...prevData, player1Name:data.name, player1Photo:data.photo
+                ...prevData, player1Name:data.player1Name, player1Photo:data.player1Photo
             }));
         })
 
