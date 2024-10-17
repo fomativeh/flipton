@@ -233,7 +233,7 @@ const Profile = ({
         )}
       </section>
 
-      <section className="p-[10px] my-[8px] fade-card w-full rounded-[8px] flex justify-start items-center font-[Poppins] font-medium text-[14px] text-white">
+      {/* <section className="p-[10px] my-[8px] fade-card w-full rounded-[8px] flex justify-start items-center font-[Poppins] font-medium text-[14px] text-white">
         <figure className="mr-[7px] relative w-[15px] h-[15px]">
           <Image src={"/assets/icons/help.svg"} alt="Help icon" fill />
         </figure>
@@ -241,9 +241,12 @@ const Profile = ({
         <span className="font-medium text-[14px] font-[Poppins] text-white">
           Help Centre
         </span>
-      </section>
+      </section> */}
 
-      {/* <section onClick={()=>postEvent("web_app_close")} className="p-[10px] my-[8px] fade-card w-full rounded-[8px] flex justify-start items-center font-[Poppins] font-medium text-[14px] text-white">
+      <section
+        onClick={() => postEvent("web_app_close")}
+        className="p-[10px] my-[8px] fade-card w-full rounded-[8px] flex justify-start items-center font-[Poppins] font-medium text-[14px] text-white"
+      >
         <figure className="mr-[7px] relative w-[15px] h-[15px]">
           <Image src={"/assets/icons/logout.svg"} alt="Logout icon" fill />
         </figure>
@@ -251,7 +254,7 @@ const Profile = ({
         <span className="font-medium text-[14px] font-[Poppins] text-white">
           Log out
         </span>
-      </section> */}
+      </section>
     </section>
   );
 };
