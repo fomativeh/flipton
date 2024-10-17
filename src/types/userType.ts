@@ -41,5 +41,5 @@ export type User = {
   walletAddress?:string,
   gameOngoing?:boolean,
   player2HasJoined?: boolean
-  gameBalance?:number
+  walletBalance?:string
 } | null

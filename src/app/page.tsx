@@ -23,6 +23,8 @@ import { winnerType } from "@/types/winnerType";
 import SplashScreen from "./components/SplashScreen/SplashScreen";
 import { initClosingBehavior, retrieveLaunchParams } from "@tma.js/sdk";
 import { useInitData, useViewport } from "@tma.js/sdk-react";
+import { leaderboardType } from "@/types/leaderboardType";
+import { fetchLeaderboard } from "@/api/leaderboard";
 
 const Home = () => {
   const [closingBehavior] = initClosingBehavior();
@@ -34,7 +36,7 @@ const Home = () => {
   const { initDataRaw } = retrieveLaunchParams();
   let token = initDataRaw as string
 
-  // // let chatId = 6450051353;
+  // let chatId = 6450051353;
   // let chatId = 1645873626;
   // let token = "";
   const [games, setGames] = useState<gameType[]>([]);
@@ -228,6 +230,26 @@ const Home = () => {
     loadOpenGames();
   }, []);
 
+  const [leaderboard, setLeaderboard] = useState<leaderboardType[]>([]);
+  const [rank, setRank] = useState<number>(0);
+
+  const loadLeaderboard = async () => {
+    try {
+      const loadLeaderboardRes = await fetchLeaderboard(token as string);
+      if (loadLeaderboardRes?.success) {
+        setLeaderboard(loadLeaderboardRes.data);
+        const myRank = loadLeaderboardRes.data.findIndex(
+          (user: leaderboardType) => user.chatId === chatId
+        );
+        setRank(myRank);
+      }
+    } catch (error) {}
+  };
+
+  useEffect(() => {
+    loadLeaderboard();
+  }, []);
+
   const [currentPage, setCurrentPage] = useState<string>("Game Lobby");
   const [createGameLoading, setCreateGameLoading] = useState<boolean>(false);
   const [startGameLoading, setStartGameLoading] = useState<boolean>(false);
@@ -239,7 +261,7 @@ const Home = () => {
     if (tonConnectUI.connected) {
       if (!userWalletAddress || userWalletAddress != walletAddress) {
         //Update wallet address
-        await updateWalletAddress(chatId, walletAddress, "")
+        await updateWalletAddress(chatId, walletAddress, "");
 
         //Repeat after 2 minutes
         setTimeout(() => {
@@ -343,19 +365,16 @@ const Home = () => {
 
           {currentPage == "Leaderboard" && (
             <Leaderboard
+              rank={rank}
+              walletAddress={walletAddress}
+              tonConnectUI={tonConnectUI}
+              walletLoaded={walletLoaded}
+              handleWalletClick={handleWalletClick}
+              chatId={chatId as number}
+              leaderboard={leaderboard}
               balance={userData?.balance as number}
               avatar={userData?.photo as string}
               name={setName(userData)}
-            />
-          )}
-
-          {currentPage == "Profile" && (
-            <Profile
-              avatar={userData?.photo as string}
-              balance={userData?.balance as number}
-              name={setName(userData)}
-              username={userData?.username as string}
-              transactions={userData?.transactions as Transaction[]}
             />
           )}
 
@@ -369,6 +388,21 @@ const Home = () => {
               avatar={userData?.photo as string}
               name={setName(userData)}
               history={userData?.history as GameHistory[]}
+            />
+          )}
+
+          {currentPage == "Profile" && (
+            <Profile
+              rank={rank}
+              walletAddress={walletAddress}
+              tonConnectUI={tonConnectUI}
+              walletLoaded={walletLoaded}
+              handleWalletClick={handleWalletClick}
+              avatar={userData?.photo as string}
+              balance={userData?.walletBalance as string}
+              name={setName(userData)}
+              username={userData?.username as string}
+              transactions={userData?.transactions as Transaction[]}
             />
           )}
         </>

@@ -40,13 +40,13 @@ const TopHeader = ({
         </span>
       </section>
 
-      <section className="flex justify-start items-center leaderboard-mini-card px-[10px] py-[4px] rounded-[5px]">
+      <section className={`flex justify-start items-center leaderboard-mini-card ${walletLoaded?`px-[8px]`:`px-[4px]`} py-[4px] rounded-[5px]`}>
         {!walletLoaded && (
           <>
             <figure className="mr-[5px] relative w-[20px] h-[20px]">
               <Image
                 src={"/assets/images/ton.svg"}
-                alt="Leaderboard icon"
+                alt="Ton icon"
                 fill
               />
             </figure>

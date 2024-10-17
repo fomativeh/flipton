@@ -116,6 +116,17 @@ const History = (props: PageProps) => {
               </section>
             );
           })}
+
+
+          {history.length==0 && (
+            <section className="font-[Poppins] absolute top-0 left-0 h-full w-full flex flex-col justify-center items-center">
+             <span className="gamelobby-title font-bold text-[20px] text-center">
+              No history yet
+            </span>
+
+            <p className="text-white mt-[20px] text-[14px]">Play more games to see history here.</p>
+            </section>
+          )}
       </section>
     </section>
   );

@@ -110,7 +110,7 @@ const GameLobby = ({
   player1Details,
   games,
 }: Props) => {
-  const [wagerAmount, setWagerAmount] = useState<string | null>(null);
+  const [wagerAmount, setWagerAmount] = useState<string>('');
   const [err, setErr] = useState<string>("");
   const [spinning, setSpinning] = useState<boolean>(false);
   const [coinSideSelected, setCoinSideSelected] = useState<"Head" | "Tail">(
@@ -145,6 +145,7 @@ const GameLobby = ({
       return setTimeout(() => setErr(""), 2800);
     }
 
+
     if (createGameLoading) return;
 
     if (!tonConnectUI.connected) {
@@ -156,7 +157,7 @@ const GameLobby = ({
     const tonweb = new TonWeb();
 
     try {
-      // // Convert the TON amount to nanoTONs
+      // Convert the TON amount to nanoTONs
       const amountInNanoTons = Math.floor(
         parseFloat(wagerAmount) * 1e9
       ).toString();
@@ -197,7 +198,8 @@ const GameLobby = ({
         console.log(error);
       }
     } catch (error) {
-      setWalletErr("Payment failed.");
+      setWalletErr("Payment failed. Please try again.");
+      setTimeout(() => setWalletErr(""), 2800);
       setCreateGameLoading(false);
       console.error("Transaction failed: ", error);
     }
