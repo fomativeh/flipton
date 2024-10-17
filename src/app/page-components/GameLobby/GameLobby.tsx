@@ -570,7 +570,7 @@ const GameLobby = ({
           {/* Player 1? Player 1 : player 2 */}
           {myCurrentGame ? (
             <section className="w-full flex justify-between items-start mt-[35px]">
-              <section className="flex flex-col justify-center items-start font-[Poppins] text-white">
+              <section className="flex flex-col max-w-[40%] justify-center items-start font-[Poppins] text-white">
                 <span>{myCurrentGame.player1Name}</span>
                 <section className="flex items-center justify-start">
                   <span className="font-medium">
@@ -591,7 +591,7 @@ const GameLobby = ({
                 vs
               </span>
 
-              <section className="flex flex-col justify-center items-start font-[Poppins] text-white">
+              <section className="flex flex-col max-w-[40%] justify-center items-start font-[Poppins] text-white">
                 <span>{myCurrentGame.player2Name}</span>
                 <section className="flex items-center justify-start">
                   <span className="font-medium">

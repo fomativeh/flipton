@@ -1,7 +1,5 @@
 import { Transaction } from "@/types/userType";
-import {
-  postEvent,
-} from "@tma.js/sdk-react";
+import { postEvent } from "@tma.js/sdk-react";
 import { TonConnectUI } from "@tonconnect/ui-react";
 import { formatNumberWithCommas } from "fomautils";
 import Image from "next/image";
@@ -53,7 +51,7 @@ type Props = {
   walletLoaded: boolean;
   tonConnectUI: TonConnectUI;
   walletAddress: string;
-  rank:number
+  rank: number;
 };
 
 const Profile = ({
@@ -66,7 +64,7 @@ const Profile = ({
   transactions,
   name,
   username,
-  rank
+  rank,
 }: Props) => {
   let moreThan5 = transactions.length > 5 ? true : false;
 
@@ -80,6 +78,7 @@ const Profile = ({
   const [expand, setExpand] = useState<boolean>(false);
 
   useEffect(() => {
+    console.log(transactionsToRender);
     if (expand) {
       setTransactionsToRender(transactions);
     } else {
@@ -202,8 +201,8 @@ const Profile = ({
         </span>
 
         <section className="w-full flex flex-col justify-start items-center mt-[10px] font-[Poppins] text-[12px] text-white">
-          {transactions.length > 0 &&
-            transactions.map((eachTransaction, i) => {
+          {transactionsToRender.length > 0 &&
+            transactionsToRender.map((eachTransaction, i) => {
               return (
                 <section
                   key={i}
@@ -219,11 +218,9 @@ const Profile = ({
             })}
 
           {transactions.length == 0 && (
-         
-
-              <p className="text-white mt-[5px] text-[12px]">
-                Play more games to see transactions here.
-              </p>
+            <p className="text-white mt-[5px] text-[12px]">
+              Play more games to see transactions here.
+            </p>
           )}
         </section>
 
@@ -247,7 +244,7 @@ const Profile = ({
         </span>
       </section>
 
-      <section onClick={()=>postEvent("web_app_close")} className="p-[10px] my-[8px] fade-card w-full rounded-[8px] flex justify-start items-center font-[Poppins] font-medium text-[14px] text-white">
+      {/* <section onClick={()=>postEvent("web_app_close")} className="p-[10px] my-[8px] fade-card w-full rounded-[8px] flex justify-start items-center font-[Poppins] font-medium text-[14px] text-white">
         <figure className="mr-[7px] relative w-[15px] h-[15px]">
           <Image src={"/assets/icons/logout.svg"} alt="Logout icon" fill />
         </figure>
@@ -255,7 +252,7 @@ const Profile = ({
         <span className="font-medium text-[14px] font-[Poppins] text-white">
           Log out
         </span>
-      </section>
+      </section> */}
     </section>
   );
 };
