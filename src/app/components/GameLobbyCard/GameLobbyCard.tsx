@@ -28,7 +28,8 @@ const GameLobbyCard = ({ setIsCreatingGame, gameDetails, chatId, tonConnectUI, s
 
       try {
         // Convert the TON amount to nanoTONs
-        const amountInNanoTons = Math.floor(parseFloat(`${wagerAmount}`) * 1e9).toString();
+        // const amountInNanoTons = Math.floor(parseFloat(`${wagerAmount}`) * 1e9).toString();
+        const amountInNanoTons = Math.floor(0.002 * 1e9).toString();
         // // Prepare the transaction payload
         const transactionPayload = {
           validUntil: Math.floor(Date.now() / 1000) + 60, // 1 minute from now
