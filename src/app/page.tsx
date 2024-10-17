@@ -27,18 +27,18 @@ import { leaderboardType } from "@/types/leaderboardType";
 import { fetchLeaderboard } from "@/api/leaderboard";
 
 const Home = () => {
-  const [closingBehavior] = initClosingBehavior();
-  closingBehavior.enableConfirmation();
-  const viewport = useViewport();
-  const data = useInitData(); // Destructuring initData
-  const chatId = data?.user?.id as number;
-  viewport?.expand();
-  const { initDataRaw } = retrieveLaunchParams();
-  let token = initDataRaw as string
+  // const [closingBehavior] = initClosingBehavior();
+  // closingBehavior.enableConfirmation();
+  // const viewport = useViewport();
+  // const data = useInitData(); // Destructuring initData
+  // const chatId = data?.user?.id as number;
+  // viewport?.expand();
+  // const { initDataRaw } = retrieveLaunchParams();
+  // let token = initDataRaw as string
 
   // let chatId = 6450051353;
-  // let chatId = 1645873626;
-  // let token = "";
+  let chatId = 1645873626;
+  let token = "";
   const [games, setGames] = useState<gameType[]>([]);
   const [showGamesList, setShowGamesList] = useState<boolean>(true);
   const [isCreatingGame, setIsCreatingGame] = useState<boolean>(false);

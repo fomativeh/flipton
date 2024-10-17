@@ -78,7 +78,6 @@ const Profile = ({
   const [expand, setExpand] = useState<boolean>(false);
 
   useEffect(() => {
-    console.log(transactionsToRender);
     if (expand) {
       setTransactionsToRender(transactions);
     } else {

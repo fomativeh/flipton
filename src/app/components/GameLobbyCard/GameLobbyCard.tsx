@@ -24,18 +24,17 @@ const GameLobbyCard = ({ setIsCreatingGame, gameDetails, chatId, tonConnectUI, s
     if (inProgress) return;
     if (joining) return;
 
-    // if (!tonConnectUI.connected) {
-    //   setWalletErr("Please connect your wallet to join a game.");
-    //   return setTimeout(() => setWalletErr(""), 2800);
-    // }
+    if (!tonConnectUI.connected) {
+      setWalletErr("Please connect your wallet to join a game.");
+      return setTimeout(() => setWalletErr(""), 2800);
+    }
 
     setJoining(true);
     try {
 
       try {
         // Convert the TON amount to nanoTONs
-        // const amountInNanoTons = Math.floor(parseFloat(`${wagerAmount}`) * 1e9).toString();
-        const amountInNanoTons = Math.floor(0.002 * 1e9).toString();
+        const amountInNanoTons = Math.floor(parseFloat(`${wagerAmount}`) * 1e9).toString();
         // // Prepare the transaction payload
         const transactionPayload = {
           validUntil: Math.floor(Date.now() / 1000) + 60, // 1 minute from now
@@ -48,8 +47,8 @@ const GameLobbyCard = ({ setIsCreatingGame, gameDetails, chatId, tonConnectUI, s
         };
 
         // Send the transaction
-        // const result = await tonConnectUI.sendTransaction(transactionPayload);
-        const joinGameRes = await joinGame(chatId, player1Id, "");
+        await tonConnectUI.sendTransaction(transactionPayload);
+        await joinGame(chatId, player1Id, "");
       } catch (error) {
         setJoining(false);
         setWalletErr("Payment failed. Please try again.")
