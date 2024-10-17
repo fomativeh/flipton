@@ -241,7 +241,7 @@ const Home = () => {
         const myRank = loadLeaderboardRes.data.findIndex(
           (user: leaderboardType) => user.chatId === chatId
         );
-        setRank(myRank);
+        setRank(myRank+1);
       }
     } catch (error) {}
   };
