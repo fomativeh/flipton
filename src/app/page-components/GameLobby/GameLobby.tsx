@@ -217,7 +217,7 @@ const GameLobby = ({
       const beginSessionRes = await beginGameSession(chatId, "");
       if (beginSessionRes?.success) {
         setStartGameLoading(false);
-        setUserData({ ...userData, waitingForPlayer2: false });
+        setUserData({ ...userData, waitingForPlayer2: false, gameOngoing:true });
         setShowGameplayModal(true);
       } else {
         setStartGameLoading(false);

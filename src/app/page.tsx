@@ -27,18 +27,18 @@ import { leaderboardType } from "@/types/leaderboardType";
 import { fetchLeaderboard } from "@/api/leaderboard";
 
 const Home = () => {
-  const [closingBehavior] = initClosingBehavior();
-  closingBehavior.enableConfirmation();
-  const viewport = useViewport();
-  const data = useInitData(); // Destructuring initData
-  const chatId = data?.user?.id as number;
-  viewport?.expand();
-  const { initDataRaw } = retrieveLaunchParams();
-  let token = initDataRaw as string
+  // const [closingBehavior] = initClosingBehavior();
+  // closingBehavior.enableConfirmation();
+  // const viewport = useViewport();
+  // const data = useInitData(); // Destructuring initData
+  // const chatId = data?.user?.id as number;
+  // viewport?.expand();
+  // const { initDataRaw } = retrieveLaunchParams();
+  // let token = initDataRaw as string
 
   // let chatId = 6450051353;
-  // let chatId = 1645873626;
-  // let token = "";
+  let chatId = 1645873626;
+  let token = "";
   const [games, setGames] = useState<gameType[]>([]);
   const [showGamesList, setShowGamesList] = useState<boolean>(true);
   const [isCreatingGame, setIsCreatingGame] = useState<boolean>(false);
@@ -76,11 +76,11 @@ const Home = () => {
   //   }
   // }, [player1Details]);
 
-  useEffect(()=>{
-    if(dataForPlayer2){
-      setShowGameplayModal(true)
+  useEffect(() => {
+    if (dataForPlayer2) {
+      setShowGameplayModal(true);
     }
-  },[dataForPlayer2])
+  }, [dataForPlayer2]);
 
   useEffect(() => {
     if (userData?.waitingForPlayer2) {
@@ -96,7 +96,6 @@ const Home = () => {
     if (userData?.player2Name || userData?.player1Name) {
       setShowGamesList(false);
     }
-    
   }, [userData]);
 
   useEffect(() => {
@@ -245,7 +244,7 @@ const Home = () => {
         const myRank = loadLeaderboardRes.data.findIndex(
           (user: leaderboardType) => user.chatId === chatId
         );
-        setRank(myRank+1);
+        setRank(myRank + 1);
       }
     } catch (error) {}
   };
