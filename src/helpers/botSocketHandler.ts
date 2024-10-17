@@ -79,7 +79,9 @@ export const botSocketHandler = (botSocket: any, gamesRef: MutableRefObject<game
 
         //Player 1 info (for joining player)
         botSocket.on("player1Details", (data: player1DetailsType) => {
-            setPlayer1Details(data)
+            setUserData((prevData) => ({
+                ...prevData, player1Name:data.name, player1Photo:data.photo
+            }));
         })
 
         //Player 1 started game

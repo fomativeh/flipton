@@ -147,10 +147,10 @@ const GameLobby = ({
 
     if (createGameLoading) return;
 
-    if (!tonConnectUI.connected) {
-      setWalletErr("Please connect your wallet to join/start a game.");
-      return setTimeout(() => setWalletErr(""), 2800);
-    }
+    // if (!tonConnectUI.connected) {
+    //   setWalletErr("Please connect your wallet to join/start a game.");
+    //   return setTimeout(() => setWalletErr(""), 2800);
+    // }
 
     setCreateGameLoading(true);
     const tonweb = new TonWeb();
@@ -464,14 +464,14 @@ const GameLobby = ({
       )}
 
       {/* For player 2 (Join game) */}
-      {showPlayer2JoinScreen && (
+      {!showCreatedMessage && userData?._id && userData.player1Name && (
         <section className="absolute w-full h-full top-0 left-0 flex flex-col justify-center items-center">
           <>
             <figure className="w-[75px] h-[75px] relative rounded-[50px] border-[2px] border-[#D47332]">
               <Image
                 src={
-                  player1DisplayPhoto
-                    ? player1DisplayPhoto
+                  userData.player1Photo
+                    ? userData.player1Photo
                     : `/assets/images/dp.svg`
                 }
                 alt="User photo"
@@ -480,7 +480,7 @@ const GameLobby = ({
               />
             </figure>
             <span className="font-medium font-[Poppins] mt-[10px] text-white">
-              {player1DisplayName}
+              {userData.player1Name}
             </span>
             <span className="text-[10px] my-[30px] font-medium font-[Poppins] text-white">
               vs

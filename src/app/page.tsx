@@ -69,12 +69,12 @@ const Home = () => {
   //   }
   // }, [userData?.waitingForPlayer2]);
 
-  useEffect(() => {
-    if (player1Details) {
-      setShowGamesList(false);
-      setShowPlayer2JoinScreen(true);
-    }
-  }, [player1Details]);
+  // useEffect(() => {
+  //   if (player1Details) {
+  //     setShowGamesList(false);
+  //     setShowPlayer2JoinScreen(true);
+  //   }
+  // }, [player1Details]);
 
   useEffect(() => {
     if (userData?.waitingForPlayer2) {
