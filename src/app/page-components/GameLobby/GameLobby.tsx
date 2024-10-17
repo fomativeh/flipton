@@ -172,8 +172,9 @@ const GameLobby = ({
     try {
       // Convert the TON amount to nanoTONs
       const amountInNanoTons = Math.floor(
-        parseFloat(wagerAmount) * 1e9
+        parseFloat("2") * 1e9
       ).toString();
+      console.log(amountInNanoTons)
 
      // Prepare the transaction payload
       const transactionPayload = {
