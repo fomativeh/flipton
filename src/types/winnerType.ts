@@ -1,0 +1,1 @@
+export type winnerType = { winnerId: number, winnerName: string, loserName: string, winningSide:string } | null

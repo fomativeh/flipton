@@ -1,0 +1,19 @@
+/* Spinning animation keyframes */
+@keyframes spin-coin {
+    0% {
+      transform: rotateY(0deg);  /* Start from the front */
+    }
+    50% {
+      transform: rotateY(180deg); /* Midpoint: back of the coin */
+    }
+    100% {
+      transform: rotateY(360deg); /* Full circle, back to front */
+    }
+  }
+  
+  /* Apply the spin animation */
+  .spin-coin {
+    animation: spin-coin .82s infinite; /* Spins continuously every 2 seconds */
+    transform-style: preserve-3d; /* Enables 3D rotation */
+  }
+  
