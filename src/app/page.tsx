@@ -36,7 +36,7 @@ const Home = () => {
   const { initDataRaw } = retrieveLaunchParams();
   let token = initDataRaw as string
 
- 
+
   const [games, setGames] = useState<gameType[]>([]);
   const [showGamesList, setShowGamesList] = useState<boolean>(true);
   const [isCreatingGame, setIsCreatingGame] = useState<boolean>(false);

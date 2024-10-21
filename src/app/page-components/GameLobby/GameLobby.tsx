@@ -65,11 +65,13 @@ type Props = {
     creatorChosenSide: "Head" | "Tail";
   } | null;
   setWalletErr: Dispatch<SetStateAction<string>>;
-  setWinner:Dispatch<SetStateAction<winnerType | null>>
-  setDataForPlayer2:Dispatch<SetStateAction<{
-    wagerAmount: number;
-    creatorChosenSide: "Head" | "Tail";
-  } | null>>
+  setWinner: Dispatch<SetStateAction<winnerType | null>>;
+  setDataForPlayer2: Dispatch<
+    SetStateAction<{
+      wagerAmount: number;
+      creatorChosenSide: "Head" | "Tail";
+    } | null>
+  >;
 };
 
 const GameLobby = ({
@@ -154,10 +156,10 @@ const GameLobby = ({
       return setTimeout(() => setErr(""), 2800);
     }
 
-    // if (parseFloat(wagerAmount) < 0.5) {
-    //   setErr("Valid wager amount = 0.5 upwards");
-    //   return setTimeout(() => setErr(""), 2800);
-    // }
+    if (parseFloat(wagerAmount) < 0.5) {
+      setErr("Valid wager amount = 0.5 upwards");
+      return setTimeout(() => setErr(""), 2800);
+    }
 
     if (createGameLoading) return;
 
@@ -175,13 +177,12 @@ const GameLobby = ({
         parseFloat(wagerAmount) * 1e9
       ).toString();
 
-     // Prepare the transaction payload
+      // Prepare the transaction payload
       const transactionPayload = {
         validUntil: Math.floor(Date.now() / 1000) + 60, // 1 minute from now
         messages: [
           {
-            address: process.env
-              .NEXT_PUBLIC_RECEIVING_ADDRESS as string, // Replace with the actual recipient address
+            address: process.env.NEXT_PUBLIC_RECEIVING_ADDRESS as string, // Replace with the actual recipient address
             amount: amountInNanoTons, // The amount in nanoTONs as a string
           },
         ],
@@ -202,7 +203,7 @@ const GameLobby = ({
           setUserData({ ...userData, waitingForPlayer2: true });
           setShowCreatedModal(true);
           setShowCreatedMessage(true);
-          setWagerAmount("")
+          setWagerAmount("");
           setTimeout(() => {
             setShowCreatedMessage(false);
           }, 1650);
@@ -263,18 +264,17 @@ const GameLobby = ({
     if (replayLoading) return;
     try {
       setReplayLoading(true);
-      setWinner(null)
-      setSpinning(false)
-      setTossing(false)
-      setDataForPlayer2(null)
+      setWinner(null);
+      setSpinning(false);
+      setTossing(false);
+      setDataForPlayer2(null);
       setReplayLoading(false);
       setShowGameplayModal(false);
       setShowGamesList(true);
-      setMyCurrentGame(null)
+      setMyCurrentGame(null);
       await loadUser();
     } catch (error) {}
   };
-
 
   return (
     <section
@@ -667,7 +667,9 @@ const GameLobby = ({
               <span
                 onClick={handlePlayAgain}
                 className={`${
-                  replayLoading? `opacity-[50%] w-[112px]`:`w-[108px] opacity-[100%]`
+                  replayLoading
+                    ? `opacity-[50%] w-[112px]`
+                    : `w-[108px] opacity-[100%]`
                 } mt-[30px]  h-[32px] flex justify-center items-center rounded-[4px] text-[#381E72] bg-[#D0BCFF] font-[Roboto] font-medium text-[14px]`}
               >
                 <span className={`${replayLoading && `mr-[10px]`}`}>
