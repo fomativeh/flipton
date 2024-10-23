@@ -161,7 +161,7 @@ const GameLobby = ({
     //   return setTimeout(() => setErr(""), 2800);
     // }
 
-    if (parseFloat(wagerAmount) < 0) {
+    if (parseFloat(wagerAmount) == 0 || parseFloat(wagerAmount) < 0) {
       setErr("Wager amount must be greater than 0");
       return setTimeout(() => setErr(""), 2800);
     }
