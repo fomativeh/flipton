@@ -50,8 +50,6 @@ type Props = {
   setTossComplete: Dispatch<SetStateAction<boolean>>;
   winner: winnerType;
   loadUser: () => Promise<void>;
-  myCurrentGame: any;
-  setMyCurrentGame: Dispatch<SetStateAction<any>>;
   createGameLoading: boolean;
   setCreateGameLoading: Dispatch<SetStateAction<boolean>>;
   startGameLoading: boolean;
@@ -82,12 +80,10 @@ const GameLobby = ({
   showPlayer2JoinScreen,
   tossing,
   setTossing,
-  myCurrentGame,
   createGameLoading,
   setCreateGameLoading,
   startGameLoading,
   setStartGameLoading,
-  setMyCurrentGame,
   winner,
   avatar,
   walletErr,
@@ -125,6 +121,7 @@ const GameLobby = ({
   const [coinSideSelected, setCoinSideSelected] = useState<"Head" | "Tail">(
     "Head"
   );
+  const [myCurrentGame, setMyCurrentGame] = useState<any>(null);
   const [replayLoading, setReplayLoading] = useState<boolean>(false);
   const player1DisplayName = userData?.player1Name
     ? userData.player1Name
@@ -134,9 +131,11 @@ const GameLobby = ({
     : player1Details?.photo;
 
   let iHaveAGame = games.filter((eachGame) => eachGame?.player1Id == chatId);
-  if (iHaveAGame.length > 0) {
-    setMyCurrentGame(iHaveAGame[0]);
-  }
+  useEffect(() => {
+    if (iHaveAGame.length > 0) {
+      setMyCurrentGame(iHaveAGame[0]);
+    }
+  }, [games]);
 
   useEffect(() => {
     if (winner) {

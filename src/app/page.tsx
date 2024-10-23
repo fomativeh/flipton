@@ -27,16 +27,14 @@ import { leaderboardType } from "@/types/leaderboardType";
 import { fetchLeaderboard } from "@/api/leaderboard";
 
 const Home = () => {
-  // const [closingBehavior] = initClosingBehavior();
-  // closingBehavior.enableConfirmation();
-  // const viewport = useViewport();
-  // const data = useInitData(); // Destructuring initData
-  // const chatId = data?.user?.id as number;
-  // viewport?.expand();
-  // const { initDataRaw } = retrieveLaunchParams();
-  // let token = initDataRaw as string
-  let token = ""
-  let chatId = 6450051353
+  const [closingBehavior] = initClosingBehavior();
+  closingBehavior.enableConfirmation();
+  const viewport = useViewport();
+  const data = useInitData(); // Destructuring initData
+  const chatId = data?.user?.id as number;
+  viewport?.expand();
+  const { initDataRaw } = retrieveLaunchParams();
+  let token = initDataRaw as string
 
 
   const [games, setGames] = useState<gameType[]>([]);
@@ -50,7 +48,6 @@ const Home = () => {
   const [player2HasJoined, setPlayer2HasJoined] = useState<boolean>(false);
   const [tossComplete, setTossComplete] = useState<boolean>(false);
   const [winner, setWinner] = useState<winnerType>(null);
-  const [myCurrentGame, setMyCurrentGame] = useState<any>(null);
   const [tossing, setTossing] = useState<boolean>(false);
   const [player1Details, setPlayer1Details] = useState<{
     photo: string;
@@ -321,8 +318,7 @@ const Home = () => {
               setStartGameLoading={setStartGameLoading}
               createGameLoading={createGameLoading}
               setCreateGameLoading={setCreateGameLoading}
-              myCurrentGame={myCurrentGame}
-              setMyCurrentGame={setMyCurrentGame}
+              
               loadUser={loadUser}
               winner={winner}
               setWinner={setWinner}
