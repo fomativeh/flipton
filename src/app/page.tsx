@@ -60,7 +60,6 @@ const Home = () => {
     creatorChosenSide: "Head" | "Tail";
   } | null>(null);
 
-
   useEffect(() => {
     if (dataForPlayer2) {
       setShowGameplayModal(true);
@@ -241,22 +240,22 @@ const Home = () => {
   const [createGameLoading, setCreateGameLoading] = useState<boolean>(false);
   const [startGameLoading, setStartGameLoading] = useState<boolean>(false);
 
-  const walletAddressCronJob = async () => {
+  const handleAddressChange = async () => {
     const userWalletAddress = userData?.walletAddress;
 
     //Update Wallet address in db
-    if (tonConnectUI.connected) {
-      // If wallet is connected, check for sync with user data in db
-      if ((!userWalletAddress || userWalletAddress !== walletAddress) && walletAddress) {
-        //Update wallet address
-        await updateWalletAddress(chatId, walletAddress as string, token);
-      }
-    } 
+    // If wallet is connected, check for sync with user data in db
+    if (
+      (!userWalletAddress || userWalletAddress !== walletAddress) &&
+      walletAddress
+    ) {
+      //Update wallet address
+      await updateWalletAddress(chatId, walletAddress as string, token);
+    }
   };
 
-  //Start the cronjob
   useEffect(() => {
-    walletAddressCronJob();
+    handleAddressChange();
   }, [walletAddress]);
 
   return (
@@ -269,7 +268,7 @@ const Home = () => {
       />
       {/* New game card */}
 
-      {walletLoaded && ( //Uncomment this before push
+      {walletLoaded && ( 
         <>
           {tonConnectUI.connected && !isCreatingGame && showGamesList && (
             <section
@@ -288,19 +287,6 @@ const Home = () => {
         </>
       )}
 
-      {/* <section
-        onClick={createGameWithPencil}
-        className="z-[99] fixed bottom-[100px] right-[22px] w-[60px] h-[60px] bg-[#2B2930] rounded-[17px] flex justify-center items-center"
-      >
-        <figure className="relative w-[20px] h-[20px]">
-          <Image
-            src={"/assets/icons/new-game.svg"}
-            alt={"New game icon"}
-            fill
-          />
-        </figure>
-      </section> */}
-
       {!userData?._id && <SplashScreen />}
 
       {userData?._id && (
@@ -318,7 +304,6 @@ const Home = () => {
               setStartGameLoading={setStartGameLoading}
               createGameLoading={createGameLoading}
               setCreateGameLoading={setCreateGameLoading}
-              
               loadUser={loadUser}
               winner={winner}
               setWinner={setWinner}
