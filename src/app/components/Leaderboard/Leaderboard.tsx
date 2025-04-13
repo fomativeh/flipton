@@ -30,8 +30,13 @@ const Leaderboard = ({
   walletAddress,
   leaderboard,
 }: Props) => {
-  let myAccount = leaderboard.filter((each) => each.chatId == chatId);
-  let amountEarned = myAccount[0].totalAmountWon;
+  let amountEarned;
+  if (leaderboard?.length > 0) {
+    let myAccount = leaderboard.filter((each) => each.chatId == chatId);
+    amountEarned = myAccount[0]?.totalAmountWon;
+  } else {
+    amountEarned  = "0";
+  }
   return (
     <section className="pt-[30px] page-bg w-full min-h-screen px-[20px] h-[100vh] overflow-y-auto relative flex flex-col justify-start items-center">
       <section className={`w-full flex justify-between items-center mb-[25px]`}>
@@ -106,105 +111,112 @@ const Leaderboard = ({
         </section>
       </section>
 
-      <section className="mt-[10px] w-[90%] flex justify-between items-center relative">
-        {leaderboard.length > 1 && (
-          <section className="flex flex-col justify-center items-center">
-            <figure className="relative w-[60px] h-[60px] mb-[10px] rounded-[50px]">
-              <Image
-                src={
-                  leaderboard[1].photo
-                    ? leaderboard[1].photo
-                    : "/assets/images/dp.svg"
-                }
-                alt="User Photo"
-                fill
-                className="rounded-[inherit]"
-              />
-            </figure>
-            <span className="font-medium font-[Poppins] text-[12px] text-white">
-              {leaderboard[1].totalAmountWon} TON
-            </span>
-            <span className="font-medium font-[Poppins] text-[12px] text-[#4A00E0] bg-[#D0BCFF] rounded-[50%] w-[20px] h-[20px] flex justify-center items-center mt-[4px]">
-              2
-            </span>
-          </section>
-        )}
-
-        <section className="w-full h-full absolute top-[-35px] left-0 flex justify-center ">
-          <section className="flex flex-col justify-center items-center">
-            <figure className="relative w-[60px] h-[60px] mb-[10px] rounded-[50px]">
-              <Image
-                src={
-                  leaderboard[0].photo
-                    ? leaderboard[0].photo
-                    : "/assets/images/dp.svg"
-                }
-                alt="User Photo"
-                fill
-                className="rounded-[inherit]"
-              />
-            </figure>
-            <span className="font-medium font-[Poppins] text-[12px] text-white">
-              {leaderboard[0].totalAmountWon} TON
-            </span>
-            <span className="font-medium font-[Poppins] text-[12px] text-[#4A00E0] bg-[#D0BCFF] rounded-[50%] w-[20px] h-[20px] flex justify-center items-center mt-[4px]">
-              1
-            </span>
-          </section>
-        </section>
-
-        {leaderboard.length > 2 && (
-          <section className="flex flex-col justify-center items-center">
-            <figure className="relative w-[60px] h-[60px] mb-[10px] rounded-[50px]">
-              <Image
-                src={
-                  leaderboard[2].photo
-                    ? leaderboard[2].photo
-                    : "/assets/images/dp.svg"
-                }
-                alt="User Photo"
-                fill
-                className="rounded-[inherit]"
-              />
-            </figure>
-            <span className="font-medium font-[Poppins] text-[12px] text-white">
-              {leaderboard[2].totalAmountWon} TON
-            </span>
-            <span className="font-medium font-[Poppins] text-[12px] text-[#4A00E0] bg-[#D0BCFF] rounded-[50%] w-[20px] h-[20px] flex justify-center items-center mt-[4px]">
-              3
-            </span>
-          </section>
-        )}
-      </section>
-
-      <section className="mb-[150px] mt-[25px] fade-card w-full rounded-[8px] flex flex-col justify-center items-center font-[Poppins] font-medium text-[12px] text-white">
-        {leaderboard.length > 0 &&
-          leaderboard.map((eachPerson, i) => {
-            return (
-              <section
-                key={i}
-                className={`w-full flex justify-between items-center py-[12px] px-[12px] ${
-                  i != leaderboard.length - 1 &&
-                  `border-b-[2px] border-b-[#8E2DE2]`
-                } `}
-              >
-                <section className="flex items-center justify-start">
-                  <span className="mr-[8px]">{i + 1}</span>
-                  <span>{eachPerson.name}</span>
+      <>
+        {leaderboard.length>0 && (
+          <>
+            <section className="mt-[10px] w-[90%] flex justify-between items-center relative">
+              {leaderboard.length > 1 && (
+                <section className="flex flex-col justify-center items-center">
+                  <figure className="relative w-[60px] h-[60px] mb-[10px] rounded-[50px]">
+                    <Image
+                      src={
+                        leaderboard[1].photo
+                          ? leaderboard[1].photo
+                          : "/assets/images/dp.svg"
+                      }
+                      alt="User Photo"
+                      fill
+                      className="rounded-[inherit]"
+                    />
+                  </figure>
+                  <span className="font-medium font-[Poppins] text-[12px] text-white">
+                    {leaderboard[1].totalAmountWon} TON
+                  </span>
+                  <span className="font-medium font-[Poppins] text-[12px] text-[#4A00E0] bg-[#D0BCFF] rounded-[50%] w-[20px] h-[20px] flex justify-center items-center mt-[4px]">
+                    2
+                  </span>
                 </section>
-                <span>{eachPerson.totalAmountWon} TON</span>
-              </section>
-            );
-          })}
+              )}
 
-        {leaderboard.length == 0 && (
-          <p className="text-white text-[12px] my-[15px]">
-            Top players will appear here.
-          </p>
+              <section className="w-full h-full absolute top-[-35px] left-0 flex justify-center ">
+                <section className="flex flex-col justify-center items-center">
+                  <figure className="relative w-[60px] h-[60px] mb-[10px] rounded-[50px]">
+                    <Image
+                      src={
+                        leaderboard[0].photo
+                          ? leaderboard[0].photo
+                          : "/assets/images/dp.svg"
+                      }
+                      alt="User Photo"
+                      fill
+                      className="rounded-[inherit]"
+                    />
+                  </figure>
+                  <span className="font-medium font-[Poppins] text-[12px] text-white">
+                    {leaderboard[0].totalAmountWon} TON
+                  </span>
+                  <span className="font-medium font-[Poppins] text-[12px] text-[#4A00E0] bg-[#D0BCFF] rounded-[50%] w-[20px] h-[20px] flex justify-center items-center mt-[4px]">
+                    1
+                  </span>
+                </section>
+              </section>
+
+              {leaderboard.length > 2 && (
+                <section className="flex flex-col justify-center items-center">
+                  <figure className="relative w-[60px] h-[60px] mb-[10px] rounded-[50px]">
+                    <Image
+                      src={
+                        leaderboard[2].photo
+                          ? leaderboard[2].photo
+                          : "/assets/images/dp.svg"
+                      }
+                      alt="User Photo"
+                      fill
+                      className="rounded-[inherit]"
+                    />
+                  </figure>
+                  <span className="font-medium font-[Poppins] text-[12px] text-white">
+                    {leaderboard[2].totalAmountWon} TON
+                  </span>
+                  <span className="font-medium font-[Poppins] text-[12px] text-[#4A00E0] bg-[#D0BCFF] rounded-[50%] w-[20px] h-[20px] flex justify-center items-center mt-[4px]">
+                    3
+                  </span>
+                </section>
+              )}
+            </section>
+
+            <section className="mb-[150px] mt-[25px] fade-card w-full rounded-[8px] flex flex-col justify-center items-center font-[Poppins] font-medium text-[12px] text-white">
+              {leaderboard.length > 0 &&
+                leaderboard.map((eachPerson, i) => {
+                  return (
+                    <section
+                      key={i}
+                      className={`w-full flex justify-between items-center py-[12px] px-[12px] ${
+                        i != leaderboard.length - 1 &&
+                        `border-b-[2px] border-b-[#8E2DE2]`
+                      } `}
+                    >
+                      <section className="flex items-center justify-start">
+                        <span className="mr-[8px]">{i + 1}</span>
+                        <span>{eachPerson.name}</span>
+                      </section>
+                      <span>{eachPerson.totalAmountWon} TON</span>
+                    </section>
+                  );
+                })}
+
+              {leaderboard.length == 0 && (
+                <p className="text-white text-[12px] my-[15px]">
+                  Top players will appear here.
+                </p>
+              )}
+            </section>
+          </>
         )}
-      </section>
+      </>
     </section>
   );
 };
 
 export default Leaderboard;
+
